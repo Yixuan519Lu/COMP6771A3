@@ -4,7 +4,8 @@
 
 # 1 Change Log <a name="1-change-log"></a>
 
-N/A
+17/07/2024 Correct statement of unweighted edge, fix typo in `insert_edge`
+18/07/2024 Clarification on order of unweighted/weighted edges, explicit assumption, internal representation requirement
 
 # 2 The Task <a name="2-the-task"></a>
 
@@ -16,11 +17,13 @@ using graph = gdwg::graph<std::string, int>;
 
 Formally, this directed weighted graph *G* = (*N*,  *E*) will consist of a set of nodes *N* and a set of unweighted/weighted edges *E*.
 
+Explicit assumption for *N* and *E*: copyable, comparable (i.e. you can do ==, < etc.), streamable (i.e. you can use `operator<<`) and hashable.
+
 All nodes are unique, that is to say, no two nodes will have the same value and shall not compare equal using `operator==`.
 
 Given a node, an edge directed into it is called an *incoming edge* and an edge directed out of it is called an *outgoing edge*. The *in-degree* of a node is the number of its incoming edges. Similarly, the *out-degree* of a node is the number of its outgoing edges.
 
-A graph can include both weighted and unweighted edges. In graph theory, unweighted edges are typically treated as having a weight as 1. This applies to this assignment as well, therefore, you need to differentiate between weighted and unweighted edges in your implementation.
+A graph can include both weighted and unweighted edges. This applies to this assignment as well, therefore, you need to differentiate between weighted and unweighted edges in your implementation.
 
 You need to make use of dynamic polymorphism to implement a base `edge` class, from which `unweighted_edge` and `weighted_edge` classes will inherit. The `edge` class will represent a directed edge from a source node `src` to a destination node `dst`. The derived classes will specialise the behaviour of the edge based on whether it is weighted or unweighted.
 
@@ -28,7 +31,7 @@ To summarise, you will need to implement the following classes along with `gdwg:
 
 * edge: An abstract base class representing an edge in the graph, which can be either weighted or unweighted. It declares pure virtual functions that must be implemented by its derived classes.
 * weighted_edge: A derived class of `edge` that represents an edge with an associated weight.
-* unweighted_edge: A derived class of `edge` that represents an edge without an associated weight, the weight is treated as 1.
+* unweighted_edge: A derived class of `edge` that represents an edge without an associated weight.
 
 Note that edges can be **reflexive**, meaning the source and destination nodes of an edge could be the same.
 
@@ -191,7 +194,7 @@ auto insert_node(N const& value) -> bool;
 3. *Returns*: `true` if the node is added to the graph and `false` otherwise.
 
 ```cpp
-auto insert_edge(N const& src, N const& dst, std::optional<edge> weight = std::nullopt) -> bool;
+auto insert_edge(N const& src, N const& dst, std::optional<E> weight = std::nullopt) -> bool;
 ```
 
 4. *Effects*: Adds a new edge representing `src` → `dst` with an optional `weight`. If weight is `std::nullopt`, an `unweighted_edge` is created. Otherwise, a `weighted_edge` with the specified weight is created. The edge is only added if there is no existing edge between `src` and `dst` with the same weight.
@@ -326,7 +329,7 @@ auto clear() noexcept -> void;
 [[nodiscard]] auto nodes() -> std::vector<N>;
 ```
 
-6. *Returns*: A sequence of all stored nodes, sorted in ascending order.
+6. *Returns*: A sequence of all stored nodes, sorted in lexicographic ascending order.
 
 7. *Complexity*: *O*(*n*), where *n* is the number of stored nodes.
 
@@ -334,7 +337,7 @@ auto clear() noexcept -> void;
 [[nodiscard]] auto edges(N const& src, N const& dst) -> std::vector<gdwg::edge>;
 ```
 
-8. *Returns*: A sequence of edges from `src` to `dst`, start with the unweighted edge (if exists), then the rest of the weighted edges are sorted in ascending order.
+8. *Returns*: A sequence of edges from `src` to `dst`, start with the unweighted edge (if exists), then the rest of the weighted edges are sorted in lexicographic ascending order.
 
 9. *Complexity*: *O*(log *n* + *e*), where *n* is the number of stored nodes and *e*is the number of stored edges.
 
@@ -351,7 +354,7 @@ auto clear() noexcept -> void;
 [[nodiscard]] auto connections(N const& src) -> std::vector<N>;
 ```
 
-13. *Returns*: A sequence of nodes (found from any immediate outgoing edge) connected to `src`, sorted in ascending order, with respect to the connected nodes.
+13. *Returns*: A sequence of nodes (found from any immediate outgoing edge) connected to `src`, sorted in lexicographic ascending order, with respect to the connected nodes.
 
 14. *Complexity*: *O*(log *n* + *e*), where *e* is the number of outgoing edges associated with `src`.
 
@@ -403,7 +406,7 @@ Note: You are REQUIRED to use `print_edge` function implemented by both `unweigh
 [source_node<sub>n</sub>] [edges<sub>n</sub>] <br/>
 </blockquote>
 
-<p>[source_node<sub>1</sub>], …, [source_node<sub>n</sub>] are placeholders for all nodes that the graph stores, sorted in ascending order. [edges<sub>1</sub>], …, [edges<sub>n</sub>] are placeholders for the below output format:</p>
+<p>[source_node<sub>1</sub>], …, [source_node<sub>n</sub>] are placeholders for all nodes that the graph stores, sorted in lexicographic ascending order. [edges<sub>1</sub>], …, [edges<sub>n</sub>] are placeholders for the below output format:</p>
 
 <blockquote>
 ( <br />
@@ -415,11 +418,9 @@ Note: You are REQUIRED to use `print_edge` function implemented by both `unweigh
 )
 </blockquote>
 
-<p>where <code>[node<span class="math inline"><sub>n</sub></span> -> node<span class="math inline"><sub>1</sub></span>] | U</code>, …, <code>[node<span class="math inline"><sub>n</sub></span> -> node<span class="math inline"><sub>n</sub></span>] | W | [weight]</code> are placeholders for each node’s connections and the corresponding weight the edge has, start with the unweighted edge(if exists), then the rest of the weighted edges are sorted in ascending order.</p>
+<p>where <code>[node<span class="math inline"><sub>n</sub></span> -> node<span class="math inline"><sub>1</sub></span>] | U</code>, …, <code>[node<span class="math inline"><sub>n</sub></span> -> node<span class="math inline"><sub>n</sub></span>] | W | [weight]</code> are placeholders for each node’s connections edge type and the corresponding weight(if exists) the edge has, always start with unweighted edges, then weighted edges, sorted in lexicographic order separately.</p>
 
-[*Example*:
-
-[*Note*: If a node doesn’t have any connections, then its corresponding <code>[edges<span class="math inline"><sub>*n*</sub></span>]</code> should be a line-separated pair of parentheses —*end note*]
+[*Note*: If a node doesn’t have any connections, the corresponding field will be represented as a line-separated pair of parentheses —*end note*]
 
 [*Example*:
 ```cpp
@@ -519,7 +520,7 @@ private:
 };
 ```
 
-1. Elements are lexicographically ordered by their source node, destination node, and edge weight, in ascending order.
+1. Edges are lexicographically ordered separately based on unweighted/weighted by their source node, destination node, and edge weight (if exists), in ascending order. Unweighted edges should **precede** all weighted edges.
 2. Nodes without any connections are not traversed.
 3. [*Note*: `gdwg::graph<N, E>::iterator` models <a href="https://en.cppreference.com/w/cpp/iterator/bidirectional_iterator">`std::bidirectional_iterator`</a>. —*end note*]
 
@@ -619,6 +620,8 @@ auto operator==(iterator const& other) -> bool;
 
 # 2.10 Compulsory internal representation
 
+You are **required** to internally represent edges using the `edge` class
+
 Your graph is **required** to own the resources (nodes and edge weights) that are passed in through the insert functions. This means creating memory on the heap and doing a proper copy of the values from the caller. This is because resources in your graph should outlive the caller’s resouce that was passed in in case it goes out of scope. For example, we want the following code to be valid.
 
 ```cpp
@@ -636,23 +639,13 @@ auto main() -> int {
 }
 ```
 
-Your graph is **required** to use smart pointers (however you please) to solve this problem.
+Your graph must not make redundant copies of nodes or edges, you should use smart pointers.
 
 1. For each node, you are only allowed to have one underlying resource (heap) stored in your graph for it.
 
 2. For each edge, no matter it's weighted or unweighted, you should avoid using unnecessary additional memory wherever possible.
 
 [*Hint*: In your own implementation you’re likely to use some containers to store things, and depending on your implementation choice, somewhere in those containers you’ll likely use either `std::unique_ptr<T>` or `std::shared_ptr<T>` —*end hint*]
-
-## 2.10.1 But why smart pointers
-
-You could feasibly implement the assignment without any smart pointers, through lots of redundant copying. For example, having a massive data structure like:
-
-```cpp
-std::map<N, std::vector<std::pair<N, E>>>
-```
-
-You can see that in this structure you would have duplicates of nodes when trying to represent this complex structure. This takes up a lot of space. We want you to build a space efficient graph. This means only storing one instance of each node and edge.
 
 # 2.11 Other notes
 
@@ -755,7 +748,7 @@ Please note: Significant penalties may apply if you do not comply with the 'Git 
 
 It's imperative that we are able to track your progress when marking.
 
-For assignment 1, there are some requirements for us to track your ongoing progress:
+For assignment 3, there are some requirements for us to track your ongoing progress:
 
 1. You must make commits on at least 3 unique days prior to due date.
 2. All of your commits to master must successfully compile (according to the pipeline). You are given 3 exceptions.
