@@ -13,7 +13,6 @@ namespace gdwg {
 	};
 	class graph {
 	 public:
-		using edge = gdwg::edge;
 
 		// Your member functions go here
 	 private:
