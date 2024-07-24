@@ -33,11 +33,11 @@ auto main() -> int {
 	// https://en.cppreference.com/w/cpp/language/structured_binding
 	// It allows you to unpack your tuple.
 	for (auto const& [from, to, weight] : g) {
-    	std::cout << from << " -> " << to << " ";
-    	if (weight.has_value()) {
-        	std::cout << "(weight " << weight << ")\n";
-    	} else {
-        	std::cout << "(no weight)\n";
-    	}
+	    std::cout << from << " -> " << to << " ";
+	    if (weight.has_value()) {
+	        std::cout << "(weight " << weight << ")\n";
+	    } else {
+	        std::cout << "(no weight)\n";
+	    }
 	}*/
 }
