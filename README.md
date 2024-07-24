@@ -13,7 +13,10 @@
 - 21/07/2024 Added `operator==` for `edge` & clearer requirement of `unweighted_edge`, `weighted_edge`'s constructor to be `public`
 - 21/07/2024 Starter code: Get rid of `edge` type alias & Fix outdated code in `client.cpp`
 - 21/07/2024 Remove lexicographic in describing order `nodes`, `edges` & correct expression on order
-
+- 22/07/2024 Correct `print_edge` output to be single space
+- 23/07/2024 Correct output in 2.8 extractor & fix wrong expression in `insert_edge`
+- 23/07/2024 Change `edge` class pure virtual function requirement to use them when appropriate.
+- 23/07/2024 Clarification on `edge` equality
 
 # 2 The Task <a name="2-the-task"></a>
 
@@ -27,13 +30,13 @@ Formally, this directed weighted graph *G* = (*N*,  *E*) will consist of a
 
 Explicit assumption for *N* and *E*: copyable, comparable (i.e. you can do ==, < etc.), streamable (i.e. you can use `operator<<`) and hashable.
 
-All nodes are unique, that is to say, no two nodes will have the same value and shall not compare equal using `operator==`.
+All nodes should be unique, that is to say, no two nodes will have the same value and shall not compare equal using `operator==`.
 
 Given a node, an edge directed into it is called an *incoming edge* and an edge directed out of it is called an *outgoing edge*. The *in-degree* of a node is the number of its incoming edges. Similarly, the *out-degree* of a node is the number of its outgoing edges.
 
 A graph can include both weighted and unweighted edges. This applies to this assignment as well, therefore, you need to differentiate between weighted and unweighted edges in your implementation. Only **ONE** unweighted edge exists between a given source and destination node.
 
-Edges are ordered first by source node, then by destination node, and finally by edge weight (if it exists) in ascending order. Unweighted edges should precede all weighted edges with the same source and destination node.
+Edges are ordered first by source node, then by destination node, and finally by edge weight (if it exists) in ascending order. Unweighted edges should precede all weighted edges with the same source and destination node. If two edges have equal source and destination nodes, as well as equal weights, they are considered to be equal.
 
 You need to make use of dynamic polymorphism to implement a base `edge` class, from which `unweighted_edge` and `weighted_edge` classes will inherit. The `edge` class will represent a directed edge from a source node `src` to a destination node `dst`. The derived classes will specialise the behaviour of the edge based on whether it is weighted or unweighted.
 
@@ -140,7 +143,7 @@ auto operator=(graph const& other) -> graph&;
 
 ## 2.3.1 edge
 
-The `edge` class is an abstract **BASE** class that declares **PURE** virtual functions which must be implemented by its derived classes.
+The `edge` class is an abstract **BASE** class that declares virtual functions which must be implemented by its derived classes. You should declare a function as **pure** virtual when its behavior must be implemented differently by each derived class.
 
 You will note that **ONLY** the member functions listed below can be specified as public in edge or its derived classes. You are free to create other private virtual functions to help with the implementation of the derived classes and the features required for gdwg::graph.
 
@@ -152,7 +155,7 @@ auto print_edge() -> std::string;
 ```
   1. *Effects*: Returns a string representation of the edge.
   2. *Returns*: A string representation of the edge.
-  3. *Remarks*: The format of the string representation is `src -> dst | W |  weight` if the edge is weighted, and `src -> dst | U` if the edge is unweighted.
+  3. *Remarks*: The format of the string representation is `src -> dst | W | weight` if the edge is weighted, and `src -> dst | U` if the edge is unweighted.
   * Note: `print_edge` will be used in the `operator<<` overload for the `graph` class.
 ```cpp
 auto is_weighted() -> bool;
@@ -219,7 +222,7 @@ auto insert_edge(N const& src, N const& dst, std::optional<E> weight = std::null
 
 5. *Postconditions*: All iterators are invalidated.
 
-6. *Returns*: `true` if the node is added to the graph and `false` otherwise.
+6. *Returns*: `true` if the edge is added to the graph and `false` otherwise.
 
 7. *Throws*: `std::runtime_error("Cannot call gdwg::graph<N, E>::insert_edge when either src or dst node does not exist")` if either of `is_node(src)` or `is_node(dst)` are `false`.
 
@@ -473,14 +476,16 @@ auto const expected_output = std::string_view(R"(
   1 -> 5 | W | -1
 )
 2 (
-  2 -> 4 | U
   2 -> 1 | W | 1
+  2 -> 4 | U
+  2 -> 4 | W | 2
 )
 3 (
   3 -> 2 | W | 2
   3 -> 6 | W | -8
 )
 4 (
+  4 -> 1 | U 
   4 -> 1 | W | -4
   4 -> 5 | W | 3
 )
@@ -694,7 +699,7 @@ As noted in <a href="#29-compulsory-internal-representation-gdwginternal">the co
 
 ## 3. Marking Criteria
 
-This assignment will contribute 20% to your final mark.
+This assignment will contribute 30% to your final mark.
 
 The assessment for the assignment recognises the difficulty of the task, the importance of style,
 and the importance of appropriate use of programming methods (e.g. using while loops instead of a
@@ -714,7 +719,7 @@ dozen if statements).
     <td>
       <b>Your tests</b><br />
       You are required to write your own tests to ensure your program works.
-      You will write tests in the <code>filtered_string_view.test.cpp</code> file. Please read the <a href="https://github.com/catchorg/Catch2/blob/master/docs/tutorial.md">Catch2 tutorial</a> or review lecture/lab content to see how to write tests. Tests will be marked on several
+      You will write tests in the <code>gdwg_graph.test.cpp</code> file. Please read the <a href="https://github.com/catchorg/Catch2/blob/master/docs/tutorial.md">Catch2 tutorial</a> or review lecture/lab content to see how to write tests. Tests will be marked on several
       factors. These include, <em>but are not limited to</em>:
       <ul>
         <li>Correctness — an incorrect test is worse than useless.</li>
