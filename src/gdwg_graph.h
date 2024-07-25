@@ -98,8 +98,22 @@ namespace gdwg {
 	 public:
 		graph() = default;
 		~graph() = default;
+		graph(graph&& input_graph) noexcept {
+			nodes_ = std::move(input_graph.nodes_);
+			edges_ = std::move(input_graph.edges_);
+		}
+		graph(std::initializer_list<N> il)
+		: graph(il.begin(), il.end()) {}
+		template<typename InputIt>
+		graph(InputIt first, InputIt last) {
+			for (auto ite = first; ite != last; ++ite) {
+				nodes_.emplace_back(*ite);
+			}
+		}
 
 	 private:
+		std::vector<N> nodes_;
+		std::vector<std::unique_ptr<edge<N, E>>> edges_;
 	};
 } // namespace gdwg
 
