@@ -22,7 +22,7 @@ namespace gdwg {
 		virtual auto is_weighted() const noexcept -> bool = 0;
 		virtual auto get_weight() const noexcept -> std::optional<E> = 0;
 		virtual auto get_nodes() const noexcept -> std::pair<N, N> = 0;
-		virtual auto operator==(edge const& rhs) const noexcept -> bool = 0;
+		virtual auto operator==(const edge<N, E>& rhs) const noexcept -> bool = 0;
 
 	 private:
 		friend class graph<N, E>;
@@ -48,8 +48,8 @@ namespace gdwg {
 		auto get_nodes() const noexcept -> std::pair<N, N> override {
 			return {src_, dst_};
 		}
-		auto operator==(edge<N, E> const& rhs) const noexcept -> bool override {
-			if (auto* obj = dynamic_cast<weighted_edge<N, E> const*>(&rhs)) {
+		auto operator==(const edge<N, E>& rhs) const noexcept -> bool override {
+			if (auto* obj = dynamic_cast<const weighted_edge<N, E>*>(&rhs)) {
 				return src_ == obj->src_ and dst_ == obj->dst_ and weight_ == obj->weight_;
 			}
 			return false;
@@ -81,8 +81,8 @@ namespace gdwg {
 		auto get_nodes() const noexcept -> std::pair<N, N> override {
 			return {src_, dst_};
 		}
-		auto operator==(edge<N, E> const& rhs) const noexcept -> bool override {
-			if (auto* obj = dynamic_cast<unweighted_edge<N, E> const*>(&rhs)) {
+		auto operator==(const edge<N, E>& rhs) const noexcept -> bool override {
+			if (auto* obj = dynamic_cast<const unweighted_edge<N, E>*>(&rhs)) {
 				return src_ == obj->src_ and dst_ == obj->dst_;
 			}
 			return false;
