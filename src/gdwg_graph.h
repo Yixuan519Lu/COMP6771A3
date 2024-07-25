@@ -64,6 +64,39 @@ namespace gdwg {
 		friend class graph<N, E>;
 	};
 	template<typename N, typename E>
+	class unweighted_edge : public edge<N, E> {
+	 public:
+		unweighted_edge(const N& src, const N& dst)
+		: src_{src}
+		, dst_{dst} {}
+
+		auto print_edge() const -> std::string override {
+			auto oss = std::ostringstream{};
+			oss << src_ << " -> " << dst_ << " | U";
+			return oss.str();
+		}
+		auto is_weighted() const -> bool override {
+			return false;
+		}
+		auto get_weight() const -> std::optional<E> override {
+			return std::nullopt;
+		}
+		auto get_nodes() const -> std::pair<N, N> override {
+			return {src_, dst_};
+		}
+		auto operator==(edge<N, E> const& rhs) const -> bool override {
+			if (auto* obj = dynamic_cast<weighted_edge<N, E> const*>(&rhs)) {
+				return src_ == obj->src_ and dst_ == obj->dst_;
+			}
+			return false;
+		}
+
+	 private:
+		N src_;
+		N dst_;
+		friend class graph<N, E>;
+	};
+	template<typename N, typename E>
 	class graph {
 	 public:
 		graph() = default;
