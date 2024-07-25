@@ -14,16 +14,15 @@
 namespace gdwg {
 	template<typename N, typename E>
 	class graph;
-
 	template<typename N, typename E>
 	class edge {
 	 public:
-		virtual ~edge() = default;
+		virtual ~edge() noexcept = default;
 		virtual auto print_edge() const -> std::string = 0;
-		virtual auto is_weighted() const -> bool = 0;
-		virtual auto get_weight() const -> std::optional<E> = 0;
-		virtual auto get_nodes() const -> std::pair<N, N> = 0;
-		virtual auto operator==(edge const& other) const -> bool = 0;
+		virtual auto is_weighted() const noexcept -> bool = 0;
+		virtual auto get_weight() const noexcept -> std::optional<E> = 0;
+		virtual auto get_nodes() const noexcept -> std::pair<N, N> = 0;
+		virtual auto operator==(edge const& rhs) const noexcept -> bool = 0;
 
 	 private:
 		friend class graph<N, E>;
@@ -31,26 +30,25 @@ namespace gdwg {
 	template<typename N, typename E>
 	class weighted_edge : public edge<N, E> {
 	 public:
-		weighted_edge(const N& src, const N& dst, const E& weight)
+		weighted_edge(const N& src, const N& dst, const E& weight) noexcept
 		: src_{src}
 		, dst_{dst}
 		, weight_{weight} {}
-
 		auto print_edge() const -> std::string override {
 			auto oss = std::ostringstream{};
 			oss << src_ << " -> " << dst_ << " | W | " << weight_;
 			return oss.str();
 		}
-		auto is_weighted() const -> bool override {
+		auto is_weighted() const noexcept -> bool override {
 			return true;
 		}
-		auto get_weight() const -> std::optional<E> override {
+		auto get_weight() const noexcept -> std::optional<E> override {
 			return weight_;
 		}
-		auto get_nodes() const -> std::pair<N, N> override {
+		auto get_nodes() const noexcept -> std::pair<N, N> override {
 			return {src_, dst_};
 		}
-		auto operator==(edge<N, E> const& rhs) const -> bool override {
+		auto operator==(edge<N, E> const& rhs) const noexcept -> bool override {
 			if (auto* obj = dynamic_cast<weighted_edge<N, E> const*>(&rhs)) {
 				return src_ == obj->src_ and dst_ == obj->dst_ and weight_ == obj->weight_;
 			}
@@ -66,26 +64,25 @@ namespace gdwg {
 	template<typename N, typename E>
 	class unweighted_edge : public edge<N, E> {
 	 public:
-		unweighted_edge(const N& src, const N& dst)
+		unweighted_edge(const N& src, const N& dst) noexcept
 		: src_{src}
 		, dst_{dst} {}
-
 		auto print_edge() const -> std::string override {
 			auto oss = std::ostringstream{};
 			oss << src_ << " -> " << dst_ << " | U";
 			return oss.str();
 		}
-		auto is_weighted() const -> bool override {
+		auto is_weighted() const noexcept -> bool override {
 			return false;
 		}
-		auto get_weight() const -> std::optional<E> override {
+		auto get_weight() const noexcept -> std::optional<E> override {
 			return std::nullopt;
 		}
-		auto get_nodes() const -> std::pair<N, N> override {
+		auto get_nodes() const noexcept -> std::pair<N, N> override {
 			return {src_, dst_};
 		}
-		auto operator==(edge<N, E> const& rhs) const -> bool override {
-			if (auto* obj = dynamic_cast<weighted_edge<N, E> const*>(&rhs)) {
+		auto operator==(edge<N, E> const& rhs) const noexcept -> bool override {
+			if (auto* obj = dynamic_cast<unweighted_edge<N, E> const*>(&rhs)) {
 				return src_ == obj->src_ and dst_ == obj->dst_;
 			}
 			return false;
