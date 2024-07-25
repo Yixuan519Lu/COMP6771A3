@@ -97,10 +97,14 @@ namespace gdwg {
 	class graph {
 	 public:
 		graph() = default;
-		~graph() = default;
-		graph(graph&& input_graph) noexcept {
-			nodes_ = std::move(input_graph.nodes_);
-			edges_ = std::move(input_graph.edges_);
+		graph(graph&& other) noexcept {
+			nodes_ = std::move(other.nodes_);
+			edges_ = std::move(other.edges_);
+			other.clear();
+		}
+		graph(const graph& other) {
+			nodes_ = other.nodes_;
+			edges_ = other.edges_;
 		}
 		graph(std::initializer_list<N> il)
 		: graph(il.begin(), il.end()) {}
@@ -109,6 +113,25 @@ namespace gdwg {
 			for (auto ite = first; ite != last; ++ite) {
 				nodes_.emplace_back(*ite);
 			}
+		}
+		auto operator=(graph&& other) noexcept -> graph& {
+			if (this != &other) {
+				nodes_ = std::move(other.nodes_);
+				edges_ = std::move(other.edges_);
+				other.clear();
+			}
+			return *this;
+		}
+		auto operator=(const graph& other) -> graph& {
+			if (this != &other) {
+				nodes_ = other.nodes_;
+				edges_ = other.edges_;
+			}
+			return *this;
+		}
+		void clear() noexcept {
+			nodes_.clear();
+			edges_.clear();
 		}
 
 	 private:
