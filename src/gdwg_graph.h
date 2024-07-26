@@ -1,5 +1,7 @@
 #ifndef GDWG_GRAPH_H
 #define GDWG_GRAPH_H
+#include <unordered_map>
+#include <unordered_set>
 #include <memory>
 #include <optional>
 #include <ostream>
@@ -111,7 +113,7 @@ namespace gdwg {
 		template<typename InputIt>
 		graph(InputIt first, InputIt last) {
 			for (auto ite = first; ite != last; ++ite) {
-				nodes_.emplace_back(*ite);
+				nodes_.emplace(*ite);
 			}
 		}
 		auto operator=(graph&& other) noexcept -> graph& {
@@ -135,8 +137,8 @@ namespace gdwg {
 		}
 
 	 private:
-		std::vector<N> nodes_;
-		std::vector<std::unique_ptr<edge<N, E>>> edges_;
+		std::unordered_set<N> nodes_;
+		std::unordered_map<N, std::unordered_set<std::pair<N, E>>> edges_;
 	};
 } // namespace gdwg
 
