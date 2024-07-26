@@ -17,6 +17,13 @@
 - 23/07/2024 Correct output in 2.8 extractor & fix wrong expression in `insert_edge`
 - 23/07/2024 Change `edge` class pure virtual function requirement to use them when appropriate.
 - 23/07/2024 Clarification on `edge` equality
+- 24/07/2024 clarification on `edge` member functions can be not `virtual`; derived classes `unweighted_edge`, `weighted_edge` from `edge` can store member parameters as `non-private`; add argument order for derived classes
+- 26/07/2024 `print_edge` not required in `operator<<` for efficiency purpose
+- 26/07/2024 Fix error in `client.cpp` & extractor output
+- 26/07/2024 Remove note for modifier: not required to handle edges
+- 26/07/2024 Clarification on template typename order of `edge`
+- 26/07/2024 Allowed to add non-member operator
+
 
 # 2 The Task <a name="2-the-task"></a>
 
@@ -42,7 +49,7 @@ You need to make use of dynamic polymorphism to implement a base `edge` class, f
 
 To summarise, you will need to implement the following classes along with `gdwg::graph`:
 
-* edge: An abstract base class representing an edge in the graph, which can be either weighted or unweighted. It declares pure virtual functions that must be implemented by its derived classes.
+* edge: An abstract base class representing an edge in the graph, which can be either weighted or unweighted. It declares virtual functions that must be implemented by its derived classes.
 * weighted_edge: A derived class of `edge` that represents an edge with an associated weight.
 * unweighted_edge: A derived class of `edge` that represents an edge without an associated weight.
 
@@ -64,9 +71,6 @@ Some words have special meaning in this document. This section precisely defines
 * *Unspecified*: the implementation is allowed to make its own decisions regarding what is unspecified, provided that it still follows the explicitly specified wording.
 * An *Effects* element may specify semantics for a function `F` in code using the term *Equivalent to*. The semantics for `F` are interpreted as follows:
   * All of the above terminology applies to the provided code, whether or not it is explicitly specified.
-
-    [*Example*: If `F` has a *Preconditions* element, but the code block doesn’t explicitly check them, then it is implied that the preconditions have been checked. —*end example*]
-
   * If there is not a *Returns* element, and `F` has a non-`void` return type, all the return statements are in the code block.
   * *Throws*, *Postconditions*, and *Complexity* elements always have priority over the code block.
 * Specified complexity requirements are upper bounds, and implementations that provide better complexity guarantees meet the requirements.
@@ -143,9 +147,11 @@ auto operator=(graph const& other) -> graph&;
 
 ## 2.3.1 edge
 
-The `edge` class is an abstract **BASE** class that declares virtual functions which must be implemented by its derived classes. You should declare a function as **pure** virtual when its behavior must be implemented differently by each derived class.
+The `edge` class should be an abstract **BASE** class, which means at least **one** of its member functions must be declared as **pure** virtual. `edge` class takes template typenames in the same order as `graph` class.
 
-You will note that **ONLY** the member functions listed below can be specified as public in edge or its derived classes. You are free to create other private virtual functions to help with the implementation of the derived classes and the features required for gdwg::graph.
+[Note: Of the member functions you are required to implement for edge, there is at least one natural candidate which should be pure virtual. You should consider declaring a function as **pure** virtual when its behavior must be implemented differently by each derived class. —end note] 
+
+You will note that **ONLY** the member functions listed below can be specified as public in edge or its derived classes. You are free to create other private functions to help with the implementation of the derived classes and the features required for `gdwg::graph`.
 
 NOTE: We didn't specify the keywords for functions such as `const`, `virtual`, `override`, or `noexcept`, this is intentional. You should use them where appropriate.
 
@@ -155,8 +161,8 @@ auto print_edge() -> std::string;
 ```
   1. *Effects*: Returns a string representation of the edge.
   2. *Returns*: A string representation of the edge.
-  3. *Remarks*: The format of the string representation is `src -> dst | W | weight` if the edge is weighted, and `src -> dst | U` if the edge is unweighted.
-  * Note: `print_edge` will be used in the `operator<<` overload for the `graph` class.
+  3. *Remarks*: The format of the string representation is `src -> dst | W | weight` if the edge is weighted, and `src -> dst | U` if the edge is unweighted, there should not be a newline character `\n` in the end.
+  * Note: `print_edge` can be used in the `operator<<` overload for the `graph` class.
 ```cpp
 auto is_weighted() -> bool;
 ```
@@ -184,24 +190,32 @@ auto operator==(edge const& other) -> bool;
 
 ## 2.3.2 weighted_edge
 
+* The `weighted_edge` class should have a **public** constructor that takes the `src`, `dst` node, and `weight` as parameters and initialises the corresponding member variables.
+
+```cpp
+weighted_edge(N const& src, N const& dst, E const& weight);
+```
+
 * The `weighted_edge` class inherits from `edge` and represents a weighted edge in the graph.
 
-* It **MUST** implement the `edge` class’s pure virtual functions to provide appropriate funtionality for weighted edges.
+* It **MUST** implement the `edge` class’s virtual functions to provide appropriate funtionality for weighted edges.
 
-* Additionally, the `weighted_edge` class should have a **public** constructor that takes the `src`, `dst` node, and `weight` as parameters and initialises the corresponding `private` member variables.
+
 
 ## 2.3.3 unweighted_edge
 
+* Similar to the `weighted_edge` class, the `unweighted_edge` class should have a **public**
+constructor that takes the `src` node and `dst` node as parameters and initialises the corresponding member variables.
+
+```cpp
+unweighted_edge(N const& src, N const& dst);
+```
+
 * The `unweighted_edge` class inherits from `edge` and represents an unweighted edge in the graph.
 
-* It **MUST** implement the `edge` class’s pure virtual functions to provide appropriate functionality for unweighted edges.
-
-* Similar to the `weighted_edge` class, the `unweighted_edge` class should have a **public**
-constructor that takes the `src` node and `dst` node as parameters and initialises the corresponding private member variables.
+* It **MUST** implement the `edge` class’s virtual functions to provide appropriate functionality for unweighted edges.
 
 # 2.4 Modifiers
-
-**Note: The edge-related functions (e.g., `insert_edge`, `replace_node`) will be responsible for creating and managing the appropriate `edge` objects (`weighted_edge` or `unweighted_edge`) based on the provided parameters.**
 
 ```cpp
 auto insert_node(N const& value) -> bool;
@@ -278,7 +292,7 @@ auto merge_replace_node(N const& old_data, N const& new_data) -> void;
 auto erase_node(N const& value) -> bool;
 ```
 
-16. *Effects*: Erases all nodes equivalent to `value`, including all incoming and outgoing edges.
+16. *Effects*: Erases node equivalent to `value`, including all incoming and outgoing edges.
 
 17. *Returns*: `true` if `value` was removed; `false` otherwise.
 18. *Postconditions*: All iterators are invalidated.
@@ -367,7 +381,7 @@ auto clear() noexcept -> void;
 ```
 
 11. *Returns*: An iterator pointing to an edge equivalent to the specified `src`, `dst`, and `weight`. If weight is `std::nullopt`, it searches for an `unweighted_edge` between `src` and `dst`. If weight has a value, it searches for a `weighted_edge` between `src` and `dst` with the specified weight. Returns `end()` if no such edge exists.
-12. *Complexity*:  O(log(*n*) + *e*), where n is the number of stored nodes and e is the number of matching edges (either weighted or unweighted) between src and dst.
+12. *Complexity*:  O(log(*n*) + *e*), where n is the number of stored nodes and e is the number of edges (either weighted or unweighted) between src and dst.
 
 ```cpp
 [[nodiscard]] auto connections(N const& src) -> std::vector<N>;
@@ -410,8 +424,6 @@ auto clear() noexcept -> void;
 friend auto operator<<(std::ostream& os, graph const& g) -> std::ostream&;
 ```
 
-Note: You are REQUIRED to use `print_edge` function implemented by both `unweighted_edge` and `weighted_edge` to format the output, failed to do so will incur mark deduction.
-
 1. *Effects*: Behaves as a <a href="https://en.cppreference.com/w/cpp/named_req/FormattedOutputFunction">formatted output function</a> of `os`.
 
 2. *Returns*: `os`.
@@ -448,7 +460,9 @@ auto const v = std::vector<std::tuple<int, int, std::optional<int>>>{
     {4, 1, -4},
     {3, 2, 2},
     {2, 4, std::nullopt},
+    {2, 4, 2},
     {2, 1, 1},
+    {4, 1, std::nullopt},
     {6, 2, 5},
     {6, 3, 10},
     {1, 5, -1},
@@ -485,7 +499,7 @@ auto const expected_output = std::string_view(R"(
   3 -> 6 | W | -8
 )
 4 (
-  4 -> 1 | U 
+  4 -> 1 | U
   4 -> 1 | W | -4
   4 -> 5 | W | 3
 )
@@ -661,7 +675,7 @@ Your graph must not internally store redundant copies of nodes or edges. You may
 
 1. For each node, you are only allowed to have one underlying resource (heap) stored in your graph for it.
 
-2. For each edge, no matter it's weighted or unweighted, you should avoid using unnecessary additional memory wherever possible.
+2. For each edge, you are not required to use `edge` for internal representation, however no matter it's weighted or unweighted, you should avoid using unnecessary additional memory wherever possible.
 
 # 2.11 Other notes
 
@@ -676,7 +690,8 @@ You must:
 You must **NOT**:
 
 * Write to any files that aren’t provided in the repo (e.g. storing your vector data in an auxilliary file)
-* Add additional members to the <b style="color: red;">public</b> interface.
+* Add additional members to the <b style="color: red;">public</b> interface. The **only** exception is you can add friend non-member operators
+
 
 You:
 
