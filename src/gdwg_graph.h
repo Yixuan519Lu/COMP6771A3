@@ -1,5 +1,7 @@
 #ifndef GDWG_GRAPH_H
 #define GDWG_GRAPH_H
+#include <unordered_map>
+#include <unordered_set>
 #include <memory>
 #include <optional>
 #include <ostream>
@@ -8,9 +10,6 @@
 #include <utility>
 #include <vector>
 
-// TODO: Make both graph and edge generic
-//       ... this won't just compile
-//       straight away
 namespace gdwg {
 	template<typename N, typename E>
 	class graph;
@@ -22,7 +21,7 @@ namespace gdwg {
 		virtual auto is_weighted() const noexcept -> bool = 0;
 		virtual auto get_weight() const noexcept -> std::optional<E> = 0;
 		virtual auto get_nodes() const noexcept -> std::pair<N, N> = 0;
-		virtual auto operator==(edge const& rhs) const noexcept -> bool = 0;
+		virtual auto operator==(const edge<N, E>& rhs) const noexcept -> bool = 0;
 
 	 private:
 		friend class graph<N, E>;
@@ -48,8 +47,8 @@ namespace gdwg {
 		auto get_nodes() const noexcept -> std::pair<N, N> override {
 			return {src_, dst_};
 		}
-		auto operator==(edge<N, E> const& rhs) const noexcept -> bool override {
-			if (auto* obj = dynamic_cast<weighted_edge<N, E> const*>(&rhs)) {
+		auto operator==(const edge<N, E>& rhs) const noexcept -> bool override {
+			if (auto* obj = dynamic_cast<const weighted_edge<N, E>*>(&rhs)) {
 				return src_ == obj->src_ and dst_ == obj->dst_ and weight_ == obj->weight_;
 			}
 			return false;
@@ -81,8 +80,8 @@ namespace gdwg {
 		auto get_nodes() const noexcept -> std::pair<N, N> override {
 			return {src_, dst_};
 		}
-		auto operator==(edge<N, E> const& rhs) const noexcept -> bool override {
-			if (auto* obj = dynamic_cast<unweighted_edge<N, E> const*>(&rhs)) {
+		auto operator==(const edge<N, E>& rhs) const noexcept -> bool override {
+			if (auto* obj = dynamic_cast<const unweighted_edge<N, E>*>(&rhs)) {
 				return src_ == obj->src_ and dst_ == obj->dst_;
 			}
 			return false;
@@ -111,7 +110,7 @@ namespace gdwg {
 		template<typename InputIt>
 		graph(InputIt first, InputIt last) {
 			for (auto ite = first; ite != last; ++ite) {
-				nodes_.emplace_back(*ite);
+				nodes_.emplace(*ite);
 			}
 		}
 		auto operator=(graph&& other) noexcept -> graph& {
@@ -135,8 +134,8 @@ namespace gdwg {
 		}
 
 	 private:
-		std::vector<N> nodes_;
-		std::vector<std::unique_ptr<edge<N, E>>> edges_;
+		std::unordered_set<N> nodes_;
+		std::unordered_map<N, std::unordered_set<std::pair<N, E>>> edges_;
 	};
 } // namespace gdwg
 
