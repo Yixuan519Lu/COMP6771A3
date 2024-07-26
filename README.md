@@ -836,4 +836,6 @@ It is your responsibiltiy to ensure that your code can run successfully on a CSE
 
 ## 8. Late Submission Policy
 
-Late submissions are not accepted, except in the case of ELS adjustment or Special Consideration approval.
+Late submissions can be made up to 72 hours late, with 5% penalty applied off your mark every time a 24 hour window passes, starting from the due date/time. This means the latest submission that we will accept (with a penalty) is Monday the 5th of August at 19:59:59.
+
+This does not account for any ELS and special consideration.
