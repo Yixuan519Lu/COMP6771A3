@@ -133,6 +133,29 @@ namespace gdwg {
 			edges_.clear();
 		}
 
+		auto insert_node(const N& value) -> bool {
+			if (is_node(value)) {
+				throw std::runtime_error("Duplicate node");
+			}
+			return nodes_.emplace(value).second;
+		}
+		auto insert_edge(const N& src, const N& dst, std::optional<E> weight = std::nullopt) -> bool {
+			if (not is_node(src) or not is_node(dst)) {
+				throw std::runtime_error("Cannot call gdwg::graph<N, E>::insert_edge when either src or dst node does "
+				                         "not exist");
+			}
+			auto& edge_set = edges_[src];
+			for (const auto& edge : edge_set) {
+				if (edge.first == dst and edge.second == weight) {
+					return false;
+				}
+			}
+			return edge_set.emplace(dst, weight).second;
+		}
+		auto is_node(const N& value) const noexcept -> bool {
+			return nodes_.find(value) != nodes_.end();
+		}
+
 	 private:
 		std::unordered_set<N> nodes_;
 		std::unordered_map<N, std::unordered_set<std::pair<N, E>>> edges_;
