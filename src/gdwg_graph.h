@@ -155,6 +155,24 @@ namespace gdwg {
 		auto is_node(const N& value) const noexcept -> bool {
 			return nodes_.find(value) != nodes_.end();
 		}
+		auto erase_node(N const& value) -> bool {
+			if (not is_node(value)) {
+				return false;
+			}
+			nodes_.erase(value);
+			edges_.erase(value);
+			for (auto& [src, dst_set] : edges_) {
+				for (auto it = dst_set.begin(); it != dst_set.end();) {
+					if (it->first == value) {
+						it = dst_set.erase(it);
+					}
+					else {
+						++it;
+					}
+				}
+			}
+			return true;
+		}
 
 	 private:
 		std::unordered_set<N> nodes_;
