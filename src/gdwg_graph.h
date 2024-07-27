@@ -246,6 +246,10 @@ namespace gdwg {
 			return true;
 		}
 		friend auto operator<<(std::ostream& os, graph const& g) -> std::ostream& {
+			if (g.nodes_.empty()) {
+				return os;
+			}
+			os << "\n";
 			for (const auto& node : g.nodes_) {
 				os << node << " (\n";
 				if (auto it = g.edges_.find(node); it != g.edges_.end()) {

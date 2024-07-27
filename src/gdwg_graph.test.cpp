@@ -49,7 +49,7 @@ TEST_CASE("gdwg::graph") {
 		}
 	}
 	SECTION("Extractor") {
-		SECTION("Example Test") {
+		SECTION("Example test") {
 			using graph = gdwg::graph<int, int>;
 			auto const v = std::vector<std::tuple<int, int, std::optional<int>>>{
 			    {4, 1, -4},
@@ -105,6 +105,13 @@ TEST_CASE("gdwg::graph") {
 )
 )");
 			CHECK(out.str() == expected_output);
+		}
+		SECTION("Empty graph test") {
+			using graph = gdwg::graph<int, std::string>;
+			auto g = graph{};
+			auto out = std::ostringstream{};
+			out << g;
+			CHECK(out.str() == "");
 		}
 	}
 }
