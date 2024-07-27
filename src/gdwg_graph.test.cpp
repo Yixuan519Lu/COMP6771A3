@@ -88,6 +88,37 @@ TEST_CASE("gdwg::graph") {
 				CHECK(out.str() == expected_output);
 			}
 		}
+		SECTION("insert_node") {
+			SECTION("Merging success") {
+				auto g = gdwg::graph<char, int>{1, 2, 3};
+				g.insert_edge(1, 2, 1);
+				g.insert_edge(1, 2);
+				g.insert_edge(1, 1, 3);
+				g.insert_edge(1, 3, 2);
+				g.insert_edge(2, 3, 3);
+				g.insert_edge(3, 2);
+				g.insert_edge(3, 1, 4);
+				g.insert_edge(3, 2, 5);
+
+				g.merge_replace_node(1, 3);
+				auto out = std::ostringstream{};
+				out << g;
+				auto const expected_output = std::string_view(R"(
+2 (
+  2 -> 3 | W | 3
+)
+3 (
+  3 -> 2 | U
+  3 -> 2 | W | 1
+  3 -> 2 | W | 5
+  3 -> 3 | W | 2
+  3 -> 3 | W | 3
+  3 -> 3 | W | 4
+)
+)");
+				CHECK(out.str() == expected_output);
+			}
+		}
 	}
 	SECTION("Extractor") {
 		SECTION("Example test") {
