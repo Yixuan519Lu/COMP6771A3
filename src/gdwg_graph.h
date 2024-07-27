@@ -3,10 +3,10 @@
 #include <unordered_map>
 #include <unordered_set>
 #include <map>
-#include <set>
 #include <memory>
 #include <optional>
 #include <ostream>
+#include <set>
 #include <sstream>
 #include <string>
 #include <utility>
@@ -251,8 +251,8 @@ namespace gdwg {
 		}
 
 	 private:
-        std::set<N> nodes_;
-        std::map<N, std::set<std::pair<N, std::optional<E>>>> edges_;
+		std::set<N> nodes_;
+		std::map<N, std::set<std::pair<N, std::optional<E>>>> edges_;
 	};
 } // namespace gdwg
 
