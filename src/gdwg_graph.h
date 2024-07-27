@@ -2,6 +2,8 @@
 #define GDWG_GRAPH_H
 #include <unordered_map>
 #include <unordered_set>
+#include <map>
+#include <set>
 #include <memory>
 #include <optional>
 #include <ostream>
@@ -161,7 +163,7 @@ namespace gdwg {
 			}
 			return edge_set.emplace(dst, weight).second;
 		}
-		auto is_node(const N& value) const noexcept -> bool {
+		[[nodiscard]] auto is_node(const N& value) const noexcept -> bool {
 			return nodes_.find(value) != nodes_.end();
 		}
 		auto empty() const noexcept -> bool {
@@ -249,8 +251,8 @@ namespace gdwg {
 		}
 
 	 private:
-		std::unordered_set<N> nodes_;
-		std::unordered_map<N, std::unordered_set<std::pair<N, E>>> edges_;
+        std::set<N> nodes_;
+        std::map<N, std::set<std::pair<N, std::optional<E>>>> edges_;
 	};
 } // namespace gdwg
 
