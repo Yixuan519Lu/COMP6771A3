@@ -155,7 +155,7 @@ namespace gdwg {
 		auto is_node(const N& value) const noexcept -> bool {
 			return nodes_.find(value) != nodes_.end();
 		}
-		auto erase_node(N const& value) -> bool {
+		auto erase_node(const N& value) -> bool {
 			if (not is_node(value)) {
 				return false;
 			}
@@ -172,6 +172,40 @@ namespace gdwg {
 				}
 			}
 			return true;
+		}
+		auto erase_edge(const N& src, const N& dst, std::optional<E> weight = std::nullopt) -> bool {
+			if (not is_node(src) or not is_node(dst)) {
+				throw std::runtime_error("Cannot call gdwg::graph<N, E>::erase_edge on src or dst if they don't exist "
+				                         "in the graph");
+			}
+			const auto src_it = edges_.find(src);
+			if (src_it == edges_.end()) {
+				return false;
+			}
+			auto& dst_set = src_it->second;
+			auto erased = false;
+			if (weight) {
+				const auto edge_it = dst_set.find({dst, *weight});
+				if (edge_it != dst_set.end()) {
+					dst_set.erase(edge_it);
+					erased = true;
+				}
+			}
+			else {
+				for (auto it = dst_set.begin(); it != dst_set.end();) {
+					if (it->first == dst) {
+						it = dst_set.erase(it);
+						erased = true;
+					}
+					else {
+						++it;
+					}
+				}
+			}
+			if (dst_set.empty()) {
+				edges_.erase(src);
+			}
+			return erased;
 		}
 
 	 private:
