@@ -249,6 +249,25 @@ namespace gdwg {
 			nodes_.erase(old_data);
 			return true;
 		}
+		friend auto operator<<(std::ostream& os, graph const& g) -> std::ostream& {
+			for (const auto& node : g.nodes_) {
+				os << node << " (\n";
+				if (auto it = g.edges_.find(node); it != g.edges_.end()) {
+					for (const auto& edge_pair : it->second) {
+						if (edge_pair.second == std::nullopt) {
+							os << "  " << node << " -> " << edge_pair.first << " | U\n";
+						}
+					}
+					for (const auto& edge_pair : it->second) {
+						if (edge_pair.second != std::nullopt) {
+							os << "  " << node << " -> " << edge_pair.first << " | W | " << *edge_pair.second << "\n";
+						}
+					}
+				}
+				os << ")\n";
+			}
+			return os;
+		}
 
 	 private:
 		std::set<N> nodes_;
