@@ -248,6 +248,52 @@ namespace gdwg {
 			nodes_.erase(old_data);
 			return true;
 		}
+		auto merge_replace_node(const N& old_data, const N& new_data) -> void {
+			if (not is_node(old_data) || not is_node(new_data)) {
+				throw std::runtime_error("Cannot call gdwg::graph<N, E>::merge_replace_node on old or new data if they "
+				                         "don't exist in the graph");
+			}
+			if (old_data == new_data) {
+				return;
+			}
+			if (auto it = edges_.find(old_data); it != edges_.end()) {
+				for (const auto& edge : it->second) {
+					auto& new_dst_set = edges_[new_data];
+					auto exists = false;
+					for (const auto& new_edge : new_dst_set) {
+						if (new_edge.first == edge.first and new_edge.second == edge.second) {
+							exists = true;
+							break;
+						}
+					}
+					if (not exists) {
+						new_dst_set.emplace(edge);
+					}
+				}
+				edges_.erase(it);
+			}
+			for (auto& [src, dst_set] : edges_) {
+				for (auto it = dst_set.begin(); it != dst_set.end();) {
+					if (it->first == old_data) {
+						auto exists = false;
+						for (const auto& new_edge : dst_set) {
+							if (new_edge.first == new_data and new_edge.second == it->second) {
+								exists = true;
+								break;
+							}
+						}
+						if (not exists) {
+							dst_set.emplace(new_data, it->second);
+						}
+						it = dst_set.erase(it);
+					}
+					else {
+						++it;
+					}
+				}
+			}
+			nodes_.erase(old_data);
+		}
 		friend auto operator<<(std::ostream& os, graph const& g) -> std::ostream& {
 			if (g.nodes_.empty()) {
 				return os;
