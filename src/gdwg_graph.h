@@ -143,11 +143,7 @@ namespace gdwg {
 			nodes_.clear();
 			edges_.clear();
 		}
-
-		auto insert_node(const N& value) -> bool {
-			if (is_node(value)) {
-				throw std::runtime_error("Duplicate node");
-			}
+		auto insert_node(N const& value) noexcept -> bool {
 			return nodes_.emplace(value).second;
 		}
 		auto insert_edge(const N& src, const N& dst, std::optional<E> weight = std::nullopt) -> bool {

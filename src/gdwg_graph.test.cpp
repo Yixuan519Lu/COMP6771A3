@@ -26,6 +26,28 @@ TEST_CASE("gdwg::graph") {
 			CHECK(g2.is_node(5));
 		}
 	}
+	SECTION("Modifiers") {
+		SECTION("insert_node") {
+			auto g = gdwg::graph<int, std::string>{};
+
+			SECTION("Insert a new node") {
+				CHECK(g.insert_node(1) == true);
+				CHECK(g.is_node(1) == true);
+			}
+
+			SECTION("Insert a duplicate node") {
+				g.insert_node(2);
+				CHECK(g.insert_node(2) == false);
+			}
+
+			SECTION("Insert multiple nodes") {
+				CHECK(g.insert_node(3) == true);
+				CHECK(g.insert_node(4) == true);
+				CHECK(g.is_node(3) == true);
+				CHECK(g.is_node(4) == true);
+			}
+		}
+	}
 	SECTION("Extractor") {
 		SECTION("Example Test") {
 			using graph = gdwg::graph<int, int>;
