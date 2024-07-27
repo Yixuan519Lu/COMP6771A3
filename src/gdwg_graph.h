@@ -214,10 +214,11 @@ namespace gdwg {
 			if (is_node(new_data)) {
 				return false;
 			}
-			nodes_.erase(old_data);
 			nodes_.emplace(new_data);
 			if (auto it = edges_.find(old_data); it != edges_.end()) {
-				edges_.emplace(new_data, std::move(it->second));
+				for (const auto& edge : it->second) {
+					edges_[new_data].emplace(edge);
+				}
 				edges_.erase(it);
 			}
 			for (auto& [src, dst_set] : edges_) {
@@ -231,6 +232,7 @@ namespace gdwg {
 					}
 				}
 			}
+			nodes_.erase(old_data);
 			return true;
 		}
 
