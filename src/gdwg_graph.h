@@ -139,7 +139,7 @@ namespace gdwg {
 			}
 			return *this;
 		}
-		void clear() noexcept {
+		auto clear() noexcept -> void {
 			nodes_.clear();
 			edges_.clear();
 		}
@@ -162,8 +162,8 @@ namespace gdwg {
 		[[nodiscard]] auto is_node(const N& value) const noexcept -> bool {
 			return nodes_.find(value) != nodes_.end();
 		}
-		auto empty() const noexcept -> bool {
-			return nodes_.empty() and edges_.empty();
+		[[nodiscard]] auto empty() const noexcept -> bool {
+			return nodes_.empty();
 		}
 		auto erase_node(const N& value) -> bool {
 			if (not is_node(value)) {
