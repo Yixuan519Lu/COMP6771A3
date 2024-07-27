@@ -90,7 +90,7 @@ TEST_CASE("gdwg::graph") {
 		}
 		SECTION("insert_node") {
 			SECTION("Merging success") {
-				auto g = gdwg::graph<char, int>{1, 2, 3};
+				auto g = gdwg::graph<int, int>{1, 2, 3};
 				g.insert_edge(1, 2, 1);
 				g.insert_edge(1, 2);
 				g.insert_edge(1, 1, 3);
@@ -114,6 +114,28 @@ TEST_CASE("gdwg::graph") {
   3 -> 3 | W | 2
   3 -> 3 | W | 3
   3 -> 3 | W | 4
+)
+)");
+				CHECK(out.str() == expected_output);
+			}
+			SECTION("Merging success 2") {
+				auto g = gdwg::graph<char, int>{'A', 'B', 'C', 'D'};
+				g.insert_edge('A', 'B', 3);
+				g.insert_edge('C', 'B', 2);
+				g.insert_edge('D', 'B', 4);
+
+				g.merge_replace_node('B', 'A');
+				auto out = std::ostringstream{};
+				out << g;
+				auto const expected_output = std::string_view(R"(
+A (
+  A -> A | W | 3
+)
+C (
+  C -> A | W | 2
+)
+D (
+  D -> A | W | 4
 )
 )");
 				CHECK(out.str() == expected_output);
