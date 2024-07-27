@@ -47,6 +47,47 @@ TEST_CASE("gdwg::graph") {
 				CHECK(g.is_node(4));
 			}
 		}
+		SECTION("replace_node") {
+			auto g = gdwg::graph<int, int>{1, 2, 3};
+			g.insert_edge(1, 2, 1);
+			g.insert_edge(2, 3, 2);
+			SECTION("Replacing success") {
+				CHECK(g.replace_node(1, 5));
+				auto out = std::ostringstream{};
+				out << g;
+				auto const expected_output = std::string_view(R"(
+2 (
+  2 -> 3 | W | 2
+)
+3 (
+)
+5 (
+  5 -> 2 | W | 1
+)
+)");
+				CHECK(out.str() == expected_output);
+			}
+			SECTION("Replacing node not exists") {
+				CHECK_THROWS_WITH(g.replace_node(4, 5),
+				                  "Cannot call gdwg::graph<N, E>::replace_node on a node that doesn't exist");
+			}
+			SECTION("Replacing node exists") {
+				CHECK(not g.replace_node(1, 2));
+				auto out = std::ostringstream{};
+				out << g;
+				auto const expected_output = std::string_view(R"(
+1 (
+  1 -> 2 | W | 1
+)
+2 (
+  2 -> 3 | W | 2
+)
+3 (
+)
+)");
+				CHECK(out.str() == expected_output);
+			}
+		}
 	}
 	SECTION("Extractor") {
 		SECTION("Example test") {

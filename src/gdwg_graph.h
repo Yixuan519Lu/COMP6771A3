@@ -224,6 +224,9 @@ namespace gdwg {
 			if (is_node(new_data)) {
 				return false;
 			}
+			if (old_data == new_data) {
+				return true;
+			}
 			nodes_.emplace(new_data);
 			if (auto it = edges_.find(old_data); it != edges_.end()) {
 				for (const auto& edge : it->second) {
