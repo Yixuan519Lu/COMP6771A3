@@ -31,20 +31,20 @@ TEST_CASE("gdwg::graph") {
 			auto g = gdwg::graph<int, std::string>{};
 
 			SECTION("Insert a new node") {
-				CHECK(g.insert_node(1) == true);
-				CHECK(g.is_node(1) == true);
+				CHECK(g.insert_node(1));
+				CHECK(g.is_node(1));
 			}
 
 			SECTION("Insert a duplicate node") {
 				g.insert_node(2);
-				CHECK(g.insert_node(2) == false);
+				CHECK(not g.insert_node(2));
 			}
 
 			SECTION("Insert multiple nodes") {
-				CHECK(g.insert_node(3) == true);
-				CHECK(g.insert_node(4) == true);
-				CHECK(g.is_node(3) == true);
-				CHECK(g.is_node(4) == true);
+				CHECK(g.insert_node(3));
+				CHECK(g.insert_node(4));
+				CHECK(g.is_node(3));
+				CHECK(g.is_node(4));
 			}
 		}
 	}
