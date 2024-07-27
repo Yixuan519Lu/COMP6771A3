@@ -9,7 +9,16 @@
 #include <string>
 #include <utility>
 #include <vector>
-
+namespace std {
+	template<typename T1, typename T2>
+	struct hash<std::pair<T1, T2>> {
+		auto operator()(const std::pair<T1, T2>& p) const -> std::size_t {
+			auto h1 = std::hash<T1>{}(p.first);
+			auto h2 = std::hash<T2>{}(p.second);
+			return (h1 << 1) ^ h2;
+		}
+	};
+} // namespace std
 namespace gdwg {
 	template<typename N, typename E>
 	class graph;
@@ -154,6 +163,9 @@ namespace gdwg {
 		}
 		auto is_node(const N& value) const noexcept -> bool {
 			return nodes_.find(value) != nodes_.end();
+		}
+		auto empty() const noexcept -> bool {
+			return nodes_.empty() and edges_.empty();
 		}
 		auto erase_node(const N& value) -> bool {
 			if (not is_node(value)) {

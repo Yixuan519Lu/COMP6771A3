@@ -6,3 +6,4 @@ Testing/
 .vs/
 .DS_Store
 CMakeFiles
+.vscode/
