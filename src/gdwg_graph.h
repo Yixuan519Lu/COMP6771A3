@@ -207,6 +207,32 @@ namespace gdwg {
 			}
 			return erased;
 		}
+		auto replace_node(const N& old_data, const N& new_data) -> bool {
+			if (not is_node(old_data)) {
+				throw std::runtime_error("Cannot call gdwg::graph<N, E>::replace_node on a node that doesn't exist");
+			}
+			if (is_node(new_data)) {
+				return false;
+			}
+			nodes_.erase(old_data);
+			nodes_.emplace(new_data);
+			if (auto it = edges_.find(old_data); it != edges_.end()) {
+				edges_.emplace(new_data, std::move(it->second));
+				edges_.erase(it);
+			}
+			for (auto& [src, dst_set] : edges_) {
+				for (auto it = dst_set.begin(); it != dst_set.end();) {
+					if (it->first == old_data) {
+						dst_set.emplace(new_data, it->second);
+						it = dst_set.erase(it);
+					}
+					else {
+						++it;
+					}
+				}
+			}
+			return true;
+		}
 
 	 private:
 		std::unordered_set<N> nodes_;
