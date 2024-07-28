@@ -169,6 +169,10 @@ namespace gdwg {
 			: outer_begin_(outer_begin)
 			, outer_end_(outer_end)
 			, inner_{(outer_begin == outer_end) ? inner_iterator{} : outer_begin->second.begin()} {}
+			explicit my_iterator(outer_iterator outer_begin, outer_iterator outer_end, inner_iterator inner)
+			: outer_begin_(outer_begin)
+			, outer_end_(outer_end)
+			, inner_(inner) {}
 
 		 private:
 			outer_iterator outer_begin_;
@@ -280,6 +284,20 @@ namespace gdwg {
 				}
 			}
 			return result;
+		}
+		[[nodiscard]] auto find(N const& src, N const& dst, std::optional<E> weight = std::nullopt) -> iterator {
+			if (not is_node(src) or not is_node(dst)) {
+				return end();
+			}
+			const auto edge_it = edges_.find(src);
+			if (edge_it != edges_.end()) {
+				for (auto inner_it = edge_it->second.begin(); inner_it != edge_it->second.end(); ++inner_it) {
+					if (inner_it->first == dst and inner_it->second == weight) {
+						return iterator(edge_it, edges_.end(), inner_it);
+					}
+				}
+			}
+			return end();
 		}
 		auto erase_node(const N& value) -> bool {
 			if (not is_node(value)) {
