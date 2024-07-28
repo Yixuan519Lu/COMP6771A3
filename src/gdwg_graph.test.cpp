@@ -134,42 +134,39 @@ TEST_CASE("gdwg::graph") {
 		}
 	}
 	SECTION("Accessors") {
-		SECTION("graph edges()") {
+		SECTION("Graph edges()") {
 			using graph = gdwg::graph<int, int>;
+			auto g = graph{};
+			g.insert_node(1);
+			g.insert_node(2);
+			g.insert_node(3);
+			g.insert_edge(1, 2, 5);
+			g.insert_edge(1, 2, 10);
+			g.insert_edge(1, 2);
+			g.insert_edge(1, 3, 15);
 
-			SECTION("Edges retrieval") {
-				auto g = graph{};
-				g.insert_node(1);
-				g.insert_node(2);
-				g.insert_node(3);
-				g.insert_edge(1, 2, 5);
-				g.insert_edge(1, 2, 10);
-				g.insert_edge(1, 2);
-				g.insert_edge(1, 3, 15);
+			SECTION("Edges exists") {
+				auto edges_1_2 = g.edges(1, 2);
+				CHECK(edges_1_2.size() == 3);
+				CHECK(edges_1_2[0]->get_weight() == std::nullopt);
+				CHECK(edges_1_2[1]->get_weight() == 5);
+				CHECK(edges_1_2[2]->get_weight() == 10);
 
-				SECTION("Valid edges retrieval") {
-					auto edges_1_2 = g.edges(1, 2);
-					CHECK(edges_1_2.size() == 3);
-					CHECK(edges_1_2[0]->get_weight() == std::nullopt);
-					CHECK(edges_1_2[1]->get_weight() == 5);
-					CHECK(edges_1_2[2]->get_weight() == 10);
-
-					auto edges_1_3 = g.edges(1, 3);
-					CHECK(edges_1_3.size() == 1);
-					CHECK(edges_1_3[0]->get_weight() == 15);
-				}
-				SECTION("Edges not exists") {
-					auto edges_2_3 = g.edges(2, 3);
-					CHECK(edges_2_3.empty());
-				}
-				SECTION("Nodes not exists") {
-					CHECK_THROWS_WITH(g.edges(4, 2),
-					                  "Cannot call gdwg::graph<N, E>::edges if src or dst node don't exist in the "
-					                  "graph");
-					CHECK_THROWS_WITH(g.edges(1, 4),
-					                  "Cannot call gdwg::graph<N, E>::edges if src or dst node don't exist in the "
-					                  "graph");
-				}
+				auto edges_1_3 = g.edges(1, 3);
+				CHECK(edges_1_3.size() == 1);
+				CHECK(edges_1_3[0]->get_weight() == 15);
+			}
+			SECTION("Edges not exists") {
+				auto edges_2_3 = g.edges(2, 3);
+				CHECK(edges_2_3.empty());
+			}
+			SECTION("Nodes not exists") {
+				CHECK_THROWS_WITH(g.edges(4, 2),
+				                  "Cannot call gdwg::graph<N, E>::edges if src or dst node don't exist in the "
+				                  "graph");
+				CHECK_THROWS_WITH(g.edges(1, 4),
+				                  "Cannot call gdwg::graph<N, E>::edges if src or dst node don't exist in the "
+				                  "graph");
 			}
 		}
 		SECTION("Find edges") {
