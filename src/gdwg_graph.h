@@ -311,7 +311,6 @@ namespace gdwg {
 				for (const auto& edge : it->second) {
 					res.push_back(edge.first);
 				}
-				std::sort(res.begin(), res.end());
 			}
 			return res;
 		}
