@@ -119,20 +119,18 @@ TEST_CASE("gdwg::graph") {
 				g.insert_edge('D', 'B', 4);
 
 				g.merge_replace_node('B', 'A');
-				auto out = std::ostringstream{};
-				out << g;
-				auto const expected_output = std::string_view(R"(
-A (
-  A -> A | W | 3
-)
-C (
-  C -> A | W | 2
-)
-D (
-  D -> A | W | 4
-)
-)");
-				CHECK(out.str() == expected_output);
+				auto nodes = g.nodes();
+				std::vector<char> expected_nodes = {'A', 'C', 'D'};
+				CHECK(nodes == expected_nodes);
+				auto edges_A_A = g.edges('A', 'A');
+				CHECK(edges_A_A.size() == 1);
+				CHECK(edges_A_A[0]->get_weight() == 3);
+				auto edges_C_A = g.edges('C', 'A');
+				CHECK(edges_C_A.size() == 1);
+				CHECK(edges_C_A[0]->get_weight() == 2);
+				auto edges_D_A = g.edges('D', 'A');
+				CHECK(edges_D_A.size() == 1);
+				CHECK(edges_D_A[0]->get_weight() == 4);
 			}
 		}
 	}
