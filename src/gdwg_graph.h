@@ -159,6 +159,9 @@ namespace gdwg {
 			auto operator==(my_iterator const& other) const -> bool {
 				return outer_begin_ == other.outer_begin_ && inner_ == other.inner_;
 			}
+			auto operator!=(my_iterator const& other) const -> bool {
+				return not(*this == other);
+			}
 
 		 private:
 			my_iterator() = default;
