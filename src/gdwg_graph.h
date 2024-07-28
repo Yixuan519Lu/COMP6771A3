@@ -118,15 +118,15 @@ namespace gdwg {
 			using difference_type = std::ptrdiff_t;
 			using iterator_category = std::bidirectional_iterator_tag;
 			auto operator*() -> reference {
-				return value_type{outer_begin->first, inner_->first, inner_->second};
+				return value_type{outer_begin_->first, inner_->first, inner_->second};
 			}
 			auto operator++() -> my_iterator& {
-				if (outer_begin != outer_end_) {
+				if (outer_begin_ != outer_end_) {
 					++inner_;
-					while (outer_begin != outer_end_ and inner_ == outer_begin->second.end()) {
-						++outer_begin;
-						if (outer_begin != outer_end_) {
-							inner_ = outer_begin->second.begin();
+					while (outer_begin_ != outer_end_ and inner_ == outer_begin_->second.end()) {
+						++outer_begin_;
+						if (outer_begin_ != outer_end_) {
+							inner_ = outer_begin_->second.begin();
 						}
 					}
 				}
@@ -137,16 +137,35 @@ namespace gdwg {
 				++(*this);
 				return temp;
 			}
+			auto operator--() -> my_iterator& {
+				if (outer_begin_ == outer_end_) {
+					--outer_begin_;
+					inner_ = outer_begin_->second.end();
+				}
+				if (inner_ == outer_begin_->second.begin()) {
+					if (outer_begin_ != edges_.begin()) {
+						--outer_begin_;
+						inner_ = outer_begin_->second.end();
+					}
+				}
+				--inner_;
+				return *this;
+			}
+			auto operator--(int) -> my_iterator {
+				auto temp = *this;
+				--(*this);
+				return temp;
+			}
 
 		 private:
 			my_iterator() = default;
 			explicit my_iterator(typename std::map<N, std::set<std::pair<N, std::optional<E>>>>::iterator outer_begin,
 			                     typename std::map<N, std::set<std::pair<N, std::optional<E>>>>::iterator outer_end)
-			: outer_begin(outer_begin)
+			: outer_begin_(outer_begin)
 			, outer_end_(outer_end) {}
 
 		 private:
-			typename std::map<N, std::set<std::pair<N, std::optional<E>>>>::iterator outer_begin;
+			typename std::map<N, std::set<std::pair<N, std::optional<E>>>>::iterator outer_begin_;
 			typename std::set<std::pair<N, std::optional<E>>>::iterator inner_;
 			typename std::map<N, std::set<std::pair<N, std::optional<E>>>>::iterator outer_end_;
 		};
