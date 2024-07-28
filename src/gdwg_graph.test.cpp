@@ -169,6 +169,55 @@ TEST_CASE("gdwg::graph") {
 				                  "graph");
 			}
 		}
+		SECTION("is_node") {
+			auto g = gdwg::graph<int, std::string>{};
+			SECTION("exists") {
+				g.insert_node(1);
+				CHECK(g.is_node(1));
+				CHECK(not g.is_node(2));
+			}
+		}
+		SECTION("empty") {
+			auto g = gdwg::graph<int, std::string>{};
+			SECTION("empty") {
+				CHECK(g.empty());
+			}
+			SECTION("not empty") {
+				g.insert_node(1);
+				CHECK(not g.empty());
+			}
+		}
+		SECTION("is_connected") {
+			auto g = gdwg::graph<int, std::string>{};
+			g.insert_node(1);
+			g.insert_node(2);
+			g.insert_edge(1, 2, "edge");
+			SECTION("connected") {
+				CHECK(g.is_connected(1, 2));
+			}
+			SECTION("not connected") {
+				CHECK(not g.is_connected(2, 1));
+			}
+			SECTION("dne") {
+				CHECK_THROWS_WITH(g.is_connected(1, 3),
+				                  "Cannot call gdwg::graph<N, E>::is_connected if src or dst node don't exist in the "
+				                  "graph");
+			}
+		}
+		SECTION("nodes") {
+			auto g = gdwg::graph<int, std::string>{};
+			SECTION("empty") {
+				auto nodes = g.nodes();
+				CHECK(nodes.empty());
+			}
+			SECTION("not empty") {
+				g.insert_node(2);
+				g.insert_node(1);
+				auto nodes = g.nodes();
+				auto expected_nodes = std::vector<int>{1, 2};
+				CHECK(nodes == expected_nodes);
+			}
+		}
 		SECTION("Find edges") {
 			using graph = gdwg::graph<int, int>;
 			auto g = graph{};

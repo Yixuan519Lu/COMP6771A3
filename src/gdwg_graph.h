@@ -256,7 +256,7 @@ namespace gdwg {
 			}
 			const auto src_it = edges_.find(src);
 			if (src_it != edges_.end()) {
-				for (const auto edge : src_it->second) {
+				for (const auto& edge : src_it->second) {
 					if (edge.first == dst) {
 						return true;
 					}
