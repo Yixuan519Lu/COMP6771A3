@@ -142,14 +142,11 @@ namespace gdwg {
 			}
 			auto operator--() -> my_iterator& {
 				if (outer_begin_ == outer_end_) {
+					return *this;
+				}
+				while (inner_ == outer_begin_->second.begin()) {
 					--outer_begin_;
 					inner_ = outer_begin_->second.end();
-				}
-				if (inner_ == outer_begin_->second.begin()) {
-					if (outer_begin_ != edges_.begin()) {
-						--outer_begin_;
-						inner_ = outer_begin_->second.end();
-					}
 				}
 				--inner_;
 				return *this;
@@ -181,7 +178,7 @@ namespace gdwg {
 		};
 
 	 public:
-		using const_iterator = typename graph<N, E>::my_iterator;
+		using iterator = typename graph<N, E>::my_iterator;
 		graph() = default;
 		graph(graph&& other) noexcept {
 			nodes_ = std::move(other.nodes_);
@@ -415,11 +412,11 @@ namespace gdwg {
 			}
 			return os;
 		}
-		auto begin() const -> const_iterator {
-			return const_iterator(edges_.cbegin(), edges_.cend());
+		[[nodiscard]] auto begin() const -> iterator {
+			return iterator(edges_.cbegin(), edges_.cend());
 		}
-		auto end() const -> const_iterator {
-			return const_iterator(edges_.cend(), edges_.cend());
+		[[nodiscard]] auto end() const -> iterator {
+			return iterator(edges_.cend(), edges_.cend());
 		}
 
 	 private:
