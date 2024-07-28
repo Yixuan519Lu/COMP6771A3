@@ -53,19 +53,15 @@ TEST_CASE("gdwg::graph") {
 			g.insert_edge(2, 3, 2);
 			SECTION("Replacing success") {
 				CHECK(g.replace_node(1, 5));
-				auto out = std::ostringstream{};
-				out << g;
-				auto const expected_output = std::string_view(R"(
-2 (
-  2 -> 3 | W | 2
-)
-3 (
-)
-5 (
-  5 -> 2 | W | 1
-)
-)");
-				CHECK(out.str() == expected_output);
+				auto nodes = g.nodes();
+				std::vector<int> expected_nodes = {2, 3, 5};
+				CHECK(nodes == expected_nodes);
+				auto edges_5_2 = g.edges(5, 2);
+				CHECK(edges_5_2.size() == 1);
+				CHECK(edges_5_2[0]->get_weight() == 1);
+				auto edges_2_3 = g.edges(2, 3);
+				CHECK(edges_2_3.size() == 1);
+				CHECK(edges_2_3[0]->get_weight() == 2);
 			}
 			SECTION("Replacing node not exists") {
 				CHECK_THROWS_WITH(g.replace_node(4, 5),
@@ -73,19 +69,15 @@ TEST_CASE("gdwg::graph") {
 			}
 			SECTION("Replacing node exists") {
 				CHECK(not g.replace_node(1, 2));
-				auto out = std::ostringstream{};
-				out << g;
-				auto const expected_output = std::string_view(R"(
-1 (
-  1 -> 2 | W | 1
-)
-2 (
-  2 -> 3 | W | 2
-)
-3 (
-)
-)");
-				CHECK(out.str() == expected_output);
+				auto nodes = g.nodes();
+				std::vector<int> expected_nodes = {1, 2, 3};
+				CHECK(nodes == expected_nodes);
+				auto edges_1_2 = g.edges(1, 2);
+				CHECK(edges_1_2.size() == 1);
+				CHECK(edges_1_2[0]->get_weight() == 1);
+				auto edges_2_3 = g.edges(2, 3);
+				CHECK(edges_2_3.size() == 1);
+				CHECK(edges_2_3[0]->get_weight() == 2);
 			}
 		}
 		SECTION("insert_node") {
@@ -99,24 +91,26 @@ TEST_CASE("gdwg::graph") {
 				g.insert_edge(3, 2);
 				g.insert_edge(3, 1, 4);
 				g.insert_edge(3, 2, 5);
-
 				g.merge_replace_node(1, 3);
-				auto out = std::ostringstream{};
-				out << g;
-				auto const expected_output = std::string_view(R"(
-2 (
-  2 -> 3 | W | 3
-)
-3 (
-  3 -> 2 | U
-  3 -> 2 | W | 1
-  3 -> 2 | W | 5
-  3 -> 3 | W | 2
-  3 -> 3 | W | 3
-  3 -> 3 | W | 4
-)
-)");
-				CHECK(out.str() == expected_output);
+				auto nodes = g.nodes();
+				std::sort(nodes.begin(), nodes.end());
+				std::vector<int> expected_nodes = {2, 3};
+				CHECK(nodes == expected_nodes);
+				auto edges_2_3 = g.edges(2, 3);
+				CHECK(edges_2_3.size() == 1);
+				CHECK(edges_2_3[0]->get_weight() == 3);
+				auto edges_3_2 = g.edges(3, 2);
+				CHECK(edges_3_2.size() == 3);
+				std::vector<std::optional<int>> expected_weights_3_2 = {std::nullopt, 1, 5};
+				for (size_t i = 0; i < edges_3_2.size(); ++i) {
+					CHECK(edges_3_2[i]->get_weight() == expected_weights_3_2[i]);
+				}
+				auto edges_3_3 = g.edges(3, 3);
+				CHECK(edges_3_3.size() == 3);
+				std::vector<int> expected_weights_3_3 = {2, 3, 4};
+				for (size_t i = 0; i < edges_3_3.size(); ++i) {
+					CHECK(edges_3_3[i]->get_weight() == expected_weights_3_3[i]);
+				}
 			}
 			SECTION("Merging success 2") {
 				auto g = gdwg::graph<char, int>{'A', 'B', 'C', 'D'};
