@@ -117,7 +117,28 @@ namespace gdwg {
 			using pointer = void;
 			using difference_type = std::ptrdiff_t;
 			using iterator_category = std::bidirectional_iterator_tag;
+			auto operator*() -> reference {
+				return value_type{outer_begin->first, inner_->first, inner_->second};
+			}
+			auto operator++() -> my_iterator& {
+				if (outer_begin != outer_end_) {
+					++inner_;
+					while (outer_begin != outer_end_ and inner_ == outer_begin->second.end()) {
+						++outer_begin;
+						if (outer_begin != outer_end_) {
+							inner_ = outer_begin->second.begin();
+						}
+					}
+				}
+				return *this;
+			}
+			auto operator++(int) -> my_iterator {
+				auto temp = *this;
+				++(*this);
+				return temp;
+			}
 
+		 private:
 			my_iterator() = default;
 			explicit my_iterator(typename std::map<N, std::set<std::pair<N, std::optional<E>>>>::iterator outer_begin,
 			                     typename std::map<N, std::set<std::pair<N, std::optional<E>>>>::iterator outer_end)
