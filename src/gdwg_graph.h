@@ -260,6 +260,27 @@ namespace gdwg {
 			}
 			return false;
 		}
+		[[nodiscard]] auto edges(const N& src, const N& dst) -> std::vector<std::unique_ptr<edge<N, E>>> {
+			if (not is_node(src) or not is_node(dst)) {
+				throw std::runtime_error("Cannot call gdwg::graph<N, E>::edges if src or dst node doesn't exist in the "
+				                         "graph");
+			}
+			std::vector<std::unique_ptr<edge<N, E>>> result;
+			auto src_it = edges_.find(src);
+			if (src_it != edges_.end()) {
+				for (const auto& edge_pair : src_it->second) {
+					if (edge_pair.first == dst) {
+						if (edge_pair.second.has_value()) {
+							result.emplace_back(std::make_unique<weighted_edge<N, E>>(src, dst, *edge_pair.second));
+						}
+						else {
+							result.emplace_back(std::make_unique<unweighted_edge<N, E>>(src, dst));
+						}
+					}
+				}
+			}
+			return result;
+		}
 		auto erase_node(const N& value) -> bool {
 			if (not is_node(value)) {
 				return false;
