@@ -74,11 +74,6 @@ namespace gdwg {
 	template<typename N, typename E>
 	class unweighted_edge : public edge<N, E> {
 	 public:
-		struct value_type {
-			N from;
-			N to;
-			E weight;
-		};
 		unweighted_edge(const N& src, const N& dst) noexcept
 		: src_{src}
 		, dst_{dst} {}
@@ -110,7 +105,33 @@ namespace gdwg {
 	};
 	template<typename N, typename E>
 	class graph {
+	 private:
+		class my_iterator {
+		 public:
+			struct value_type {
+				N from;
+				N to;
+				E weight;
+			};
+			using reference = value_type;
+			using pointer = void;
+			using difference_type = std::ptrdiff_t;
+			using iterator_category = std::bidirectional_iterator_tag;
+
+			my_iterator() = default;
+			explicit my_iterator(typename std::map<N, std::set<std::pair<N, std::optional<E>>>>::iterator outer_begin,
+			                     typename std::map<N, std::set<std::pair<N, std::optional<E>>>>::iterator outer_end)
+			: outer_begin(outer_begin)
+			, outer_end_(outer_end) {}
+
+		 private:
+			typename std::map<N, std::set<std::pair<N, std::optional<E>>>>::iterator outer_begin;
+			typename std::set<std::pair<N, std::optional<E>>>::iterator inner_;
+			typename std::map<N, std::set<std::pair<N, std::optional<E>>>>::iterator outer_end_;
+		};
+
 	 public:
+		using iterator = typename graph<N, E>::my_iterator;
 		graph() = default;
 		graph(graph&& other) noexcept {
 			nodes_ = std::move(other.nodes_);
@@ -322,30 +343,7 @@ namespace gdwg {
 			}
 			return os;
 		}
-		class iterator {
-		 public:
-			using value_type = graph<N, E>::value_type;
-			using reference = value_type;
-			using pointer = void;
-			using difference_type = std::ptrdiff_t;
-			using iterator_category = std::bidirectional_iterator_tag;
-
-			iterator() = default;
-			explicit iterator(typename std::map<N, std::set<std::pair<N, std::optional<E>>>>::iterator outer,
-			                  typename std::map<N, std::set<std::pair<N, std::optional<E>>>>::iterator outer_end)
-			: outer_(outer)
-			, outer_end_(outer_end) {
-				if (outer_ != outer_end_) {
-					inner_ = outer_->second.begin();
-					adjust_outer();
-				}
-			}
-
-		 private:
-			typename std::map<N, std::set<std::pair<N, std::optional<E>>>>::iterator outer_;
-			typename std::set<std::pair<N, std::optional<E>>>::iterator inner_;
-			typename std::map<N, std::set<std::pair<N, std::optional<E>>>>::iterator outer_end_;
-		} auto begin() -> iterator {
+		auto begin() -> iterator {
 			return iterator(edges_.begin(), edges_.end());
 		}
 		auto end() -> iterator {
