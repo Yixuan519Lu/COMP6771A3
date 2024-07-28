@@ -162,7 +162,9 @@ namespace gdwg {
 			explicit my_iterator(typename std::map<N, std::set<std::pair<N, std::optional<E>>>>::iterator outer_begin,
 			                     typename std::map<N, std::set<std::pair<N, std::optional<E>>>>::iterator outer_end)
 			: outer_begin_(outer_begin)
-			, outer_end_(outer_end) {}
+			, outer_end_(outer_end)
+			, inner_{(outer_begin == outer_end) ? typename std::set<std::pair<N, std::optional<E>>>::iterator{}
+			                                    : outer_begin->second.begin()} {}
 
 		 private:
 			typename std::map<N, std::set<std::pair<N, std::optional<E>>>>::iterator outer_begin_;
