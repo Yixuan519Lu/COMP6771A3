@@ -262,7 +262,7 @@ namespace gdwg {
 		}
 		[[nodiscard]] auto edges(const N& src, const N& dst) -> std::vector<std::unique_ptr<edge<N, E>>> {
 			if (not is_node(src) or not is_node(dst)) {
-				throw std::runtime_error("Cannot call gdwg::graph<N, E>::edges if src or dst node doesn't exist in the "
+				throw std::runtime_error("Cannot call gdwg::graph<N, E>::edges if src or dst node don't exist in the "
 				                         "graph");
 			}
 			std::vector<std::unique_ptr<edge<N, E>>> result;
