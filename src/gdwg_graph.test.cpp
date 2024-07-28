@@ -181,6 +181,45 @@ D (
 				}
 			}
 		}
+		SECTION("Find edges") {
+			using graph = gdwg::graph<int, int>;
+			auto g = graph{};
+			g.insert_node(1);
+			g.insert_node(2);
+			g.insert_node(3);
+			g.insert_edge(1, 2, 5);
+			g.insert_edge(1, 2, 10);
+			g.insert_edge(1, 2);
+			g.insert_edge(1, 3, 15);
+
+			SECTION("weighted edge exists") {
+				auto it = g.find(1, 2, 5);
+				CHECK(it != g.end());
+				auto edge = *it;
+				CHECK(edge.from == 1);
+				CHECK(edge.to == 2);
+				CHECK(edge.weight == 5);
+			}
+
+			SECTION("unweighted edge exists") {
+				auto it = g.find(1, 2, std::nullopt);
+				CHECK(it != g.end());
+				auto edge = *it;
+				CHECK(edge.from == 1);
+				CHECK(edge.to == 2);
+				CHECK(edge.weight == std::nullopt);
+			}
+
+			SECTION("edge not exists") {
+				auto it = g.find(2, 3);
+				CHECK(it == g.end());
+			}
+
+			SECTION("node not exists") {
+				auto it = g.find(4, 2);
+				CHECK(it == g.end());
+			}
+		}
 	}
 	SECTION("Extractor") {
 		SECTION("Example test") {
