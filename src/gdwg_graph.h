@@ -269,21 +269,21 @@ namespace gdwg {
 				throw std::runtime_error("Cannot call gdwg::graph<N, E>::edges if src or dst node don't exist in the "
 				                         "graph");
 			}
-			std::vector<std::unique_ptr<edge<N, E>>> result;
+			auto res = std::vector<std::unique_ptr<edge<N, E>>>{};
 			auto src_it = edges_.find(src);
 			if (src_it != edges_.end()) {
 				for (const auto& edge_pair : src_it->second) {
 					if (edge_pair.first == dst) {
 						if (edge_pair.second.has_value()) {
-							result.emplace_back(std::make_unique<weighted_edge<N, E>>(src, dst, *edge_pair.second));
+							res.emplace_back(std::make_unique<weighted_edge<N, E>>(src, dst, *edge_pair.second));
 						}
 						else {
-							result.emplace_back(std::make_unique<unweighted_edge<N, E>>(src, dst));
+							res.emplace_back(std::make_unique<unweighted_edge<N, E>>(src, dst));
 						}
 					}
 				}
 			}
-			return result;
+			return res;
 		}
 		[[nodiscard]] auto find(N const& src, N const& dst, std::optional<E> weight = std::nullopt) -> iterator {
 			if (not is_node(src) or not is_node(dst)) {
@@ -304,12 +304,15 @@ namespace gdwg {
 				throw std::runtime_error("Cannot call gdwg::graph<N, E>::connections if src doesn't exist in the "
 				                         "graph");
 			}
-			auto it = edges_.find(src);
-			std::vector<N> res;
-
+			const auto it = edges_.find(src);
+			auto res = std::vector<N>{};
+			auto last_node = std::optional<N>{};
 			if (it != edges_.end()) {
 				for (const auto& edge : it->second) {
-					res.push_back(edge.first);
+					if (not last_node or last_node.value() != edge.first) {
+						res.push_back(edge.first);
+						last_node = edge.first;
+					}
 				}
 			}
 			return res;
