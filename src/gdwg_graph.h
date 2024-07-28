@@ -299,6 +299,22 @@ namespace gdwg {
 			}
 			return end();
 		}
+		[[nodiscard]] auto connections(N const& src) -> std::vector<N> {
+			if (not is_node(src)) {
+				throw std::runtime_error("Cannot call gdwg::graph<N, E>::connections if src doesn't exist in the "
+				                         "graph");
+			}
+			auto it = edges_.find(src);
+			std::vector<N> res;
+
+			if (it != edges_.end()) {
+				for (const auto& edge : it->second) {
+					res.push_back(edge.first);
+				}
+				std::sort(res.begin(), res.end());
+			}
+			return res;
+		}
 		auto erase_node(const N& value) -> bool {
 			if (not is_node(value)) {
 				return false;
