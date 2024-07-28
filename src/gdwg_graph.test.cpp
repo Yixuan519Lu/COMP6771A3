@@ -80,7 +80,7 @@ TEST_CASE("gdwg::graph") {
 				CHECK(edges_2_3[0]->get_weight() == 2);
 			}
 		}
-		SECTION("insert_node") {
+		SECTION("merge_node") {
 			SECTION("Merging success") {
 				auto g = gdwg::graph<int, int>{1, 2, 3};
 				g.insert_edge(1, 2, 1);
