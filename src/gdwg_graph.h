@@ -107,6 +107,9 @@ namespace gdwg {
 	class graph {
 	 private:
 		class my_iterator {
+			using inner_iterator = typename std::set<std::pair<N, std::optional<E>>>::const_iterator;
+			using outer_iterator = typename std::map<N, std::set<std::pair<N, std::optional<E>>>>::const_iterator;
+
 		 public:
 			struct value_type {
 				N from;
@@ -165,22 +168,20 @@ namespace gdwg {
 
 		 private:
 			my_iterator() = default;
-			explicit my_iterator(typename std::map<N, std::set<std::pair<N, std::optional<E>>>>::iterator outer_begin,
-			                     typename std::map<N, std::set<std::pair<N, std::optional<E>>>>::iterator outer_end)
+			explicit my_iterator(outer_iterator outer_begin, outer_iterator outer_end)
 			: outer_begin_(outer_begin)
 			, outer_end_(outer_end)
-			, inner_{(outer_begin == outer_end) ? typename std::set<std::pair<N, std::optional<E>>>::iterator{}
-			                                    : outer_begin->second.begin()} {}
+			, inner_{(outer_begin == outer_end) ? inner_iterator{} : outer_begin->second.begin()} {}
 
 		 private:
-			typename std::map<N, std::set<std::pair<N, std::optional<E>>>>::iterator outer_begin_;
-			typename std::map<N, std::set<std::pair<N, std::optional<E>>>>::iterator outer_end_;
-			typename std::set<std::pair<N, std::optional<E>>>::iterator inner_;
+			outer_iterator outer_begin_;
+			outer_iterator outer_end_;
+			inner_iterator inner_;
 			friend class graph<N, E>;
 		};
 
 	 public:
-		using iterator = typename graph<N, E>::my_iterator;
+		using const_iterator = typename graph<N, E>::my_iterator;
 		graph() = default;
 		graph(graph&& other) noexcept {
 			nodes_ = std::move(other.nodes_);
@@ -392,11 +393,11 @@ namespace gdwg {
 			}
 			return os;
 		}
-		auto begin() -> iterator {
-			return iterator(edges_.begin(), edges_.end());
+		auto begin() const -> const_iterator {
+			return const_iterator(edges_.cbegin(), edges_.cend());
 		}
-		auto end() -> iterator {
-			return iterator(edges_.end(), edges_.end());
+		auto end() const -> const_iterator {
+			return const_iterator(edges_.cend(), edges_.cend());
 		}
 
 	 private:
