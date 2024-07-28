@@ -176,6 +176,7 @@ namespace gdwg {
 			typename std::map<N, std::set<std::pair<N, std::optional<E>>>>::iterator outer_begin_;
 			typename std::set<std::pair<N, std::optional<E>>>::iterator inner_;
 			typename std::map<N, std::set<std::pair<N, std::optional<E>>>>::iterator outer_end_;
+			friend class graph<N, E>;
 		};
 
 	 public:
