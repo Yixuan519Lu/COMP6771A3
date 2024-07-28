@@ -239,7 +239,29 @@ namespace gdwg {
 			return nodes_.find(value) != nodes_.end();
 		}
 		[[nodiscard]] auto empty() const noexcept -> bool {
-			return nodes_.empty();
+			return nodes_.empty() and edges_.empty();
+		}
+		[[nodiscard]] auto nodes() -> std::vector<N> {
+			auto res = std::vector<N>{};
+			for (const auto& node : nodes_) {
+				res.push_back(node);
+			}
+			return res;
+		}
+		[[nodiscard]] auto is_connected(const N& src, const N& dst) -> bool {
+			if (not is_node(src) or not is_node(dst)) {
+				throw std::runtime_error("Cannot call gdwg::graph<N, E>::is_connected if src or dst node don't exist "
+				                         "in the graph");
+			}
+			const auto src_it = edges_.find(src);
+			if (src_it != edges_.end()) {
+				for (const auto edge : src_it->second) {
+					if (edge.first == dst) {
+						return true;
+					}
+				}
+			}
+			return false;
 		}
 		auto erase_node(const N& value) -> bool {
 			if (not is_node(value)) {
