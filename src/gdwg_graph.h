@@ -111,7 +111,7 @@ namespace gdwg {
 			struct value_type {
 				N from;
 				N to;
-				E weight;
+				std::optional<E> weight;
 			};
 			using reference = value_type;
 			using pointer = void;
@@ -174,8 +174,8 @@ namespace gdwg {
 
 		 private:
 			typename std::map<N, std::set<std::pair<N, std::optional<E>>>>::iterator outer_begin_;
-			typename std::set<std::pair<N, std::optional<E>>>::iterator inner_;
 			typename std::map<N, std::set<std::pair<N, std::optional<E>>>>::iterator outer_end_;
+			typename std::set<std::pair<N, std::optional<E>>>::iterator inner_;
 			friend class graph<N, E>;
 		};
 
