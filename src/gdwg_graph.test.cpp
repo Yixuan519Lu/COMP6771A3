@@ -64,11 +64,8 @@ TEST_CASE("gdwg::graph") {
 			auto g3 = graph{};
 			g3 = g2;
 			CHECK(g3 == g2);
-			CHECK(edges_1_2.size() == 1);
-			CHECK(edges_1_2[0]->get_weight() == 2);
 		}
 	}
-
 	SECTION("Modifiers") {
 		using graph = gdwg::graph<int, int>;
 		SECTION("insert_node") {

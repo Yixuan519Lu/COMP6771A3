@@ -2,6 +2,7 @@
 #define GDWG_GRAPH_H
 #include <unordered_map>
 #include <unordered_set>
+#include <algorithm>
 #include <map>
 #include <memory>
 #include <optional>
@@ -205,7 +206,7 @@ namespace gdwg {
 		template<typename InputIt>
 		graph(InputIt first, InputIt last) {
 			for (auto ite = first; ite != last; ++ite) {
-				nodes_.emplace(std::make_shared<N>(*it));
+				nodes_.emplace(std::make_shared<N>(*ite));
 			}
 		}
 		auto operator=(graph&& other) noexcept -> graph& {
@@ -243,6 +244,8 @@ namespace gdwg {
 			return nodes_.emplace(node).second;
 		}
 		auto insert_edge(const N& src, const N& dst, std::optional<E> weight = std::nullopt) -> bool {
+			const auto src_sp = find_node(src);
+			const auto dst_sp = find_node(dst);
 			if (not is_node(src) or not is_node(dst)) {
 				throw std::runtime_error("Cannot call gdwg::graph<N, E>::insert_edge when either src or dst node does "
 				                         "not exist");
@@ -269,6 +272,8 @@ namespace gdwg {
 			return res;
 		}
 		[[nodiscard]] auto is_connected(const N& src, const N& dst) -> bool {
+			const auto src_sp = find_node(src);
+			const auto dst_sp = find_node(dst);
 			if (not is_node(src) or not is_node(dst)) {
 				throw std::runtime_error("Cannot call gdwg::graph<N, E>::is_connected if src or dst node don't exist "
 				                         "in the graph");
@@ -284,6 +289,8 @@ namespace gdwg {
 			return false;
 		}
 		[[nodiscard]] auto edges(const N& src, const N& dst) -> std::vector<std::unique_ptr<edge<N, E>>> {
+			const auto src_sp = find_node(src);
+			const auto dst_sp = find_node(dst);
 			if (not is_node(src) or not is_node(dst)) {
 				throw std::runtime_error("Cannot call gdwg::graph<N, E>::edges if src or dst node don't exist in the "
 				                         "graph");
@@ -305,6 +312,8 @@ namespace gdwg {
 			return res;
 		}
 		[[nodiscard]] auto find(N const& src, N const& dst, std::optional<E> weight = std::nullopt) -> iterator {
+			const auto src_sp = find_node(src);
+			const auto dst_sp = find_node(dst);
 			if (not is_node(src) or not is_node(dst)) {
 				return end();
 			}
@@ -320,6 +329,7 @@ namespace gdwg {
 			return end();
 		}
 		[[nodiscard]] auto connections(N const& src) -> std::vector<N> {
+			const auto src_sp = find_node(src);
 			if (not is_node(src)) {
 				throw std::runtime_error("Cannot call gdwg::graph<N, E>::connections if src doesn't exist in the "
 				                         "graph");
@@ -338,6 +348,7 @@ namespace gdwg {
 			return res;
 		}
 		auto erase_node(const N& value) -> bool {
+			const auto node_sp = find_node(value);
 			if (not is_node(value)) {
 				return false;
 			}
@@ -356,6 +367,8 @@ namespace gdwg {
 			return true;
 		}
 		auto erase_edge(const N& src, const N& dst, std::optional<E> weight = std::nullopt) -> bool {
+			const auto src_sp = find_node(src);
+			const auto dst_sp = find_node(dst);
 			if (not is_node(src) or not is_node(dst)) {
 				throw std::runtime_error("Cannot call gdwg::graph<N, E>::erase_edge on src or dst if they don't exist "
 				                         "in the graph");
