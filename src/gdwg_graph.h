@@ -475,6 +475,9 @@ namespace gdwg {
 		[[nodiscard]] auto end() const -> iterator {
 			return iterator(edges_.cend(), edges_.cend());
 		}
+		[[nodiscard]] auto operator==(graph const& other) const -> bool {
+			return nodes_ == other.nodes_ and edges_ == other.edges_;
+		}
 
 	 private:
 		std::set<N> nodes_;

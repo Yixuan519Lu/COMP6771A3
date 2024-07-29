@@ -10,20 +10,29 @@ TEST_CASE("gdwg::graph") {
 			auto g2 = gdwg::graph<double, double>{};
 			CHECK(g2.empty());
 		}
-		SECTION("Move constructor") {
-			auto g1 = gdwg::graph<int, std::string>{1, 2, 3};
-			auto n = 5;
-			g1.insert_node(n);
-			auto g2 = std::move(g1);
-			CHECK(not g1.is_node(1));
-			CHECK(not g1.is_node(2));
-			CHECK(not g1.is_node(3));
-			CHECK(not g1.is_node(5));
-			CHECK(g1.empty());
-			CHECK(g2.is_node(1));
-			CHECK(g2.is_node(2));
-			CHECK(g2.is_node(3));
-			CHECK(g2.is_node(5));
+		SECTION("Copy and Move constructor") {
+			SECTION("nonempty") {
+				auto g1 = gdwg::graph<int, std::string>{1, 2};
+				g1.insert_edge(1, 2, "a");
+				auto g2 = gdwg::graph<int, std::string>{g1};
+				CHECK(g2.is_node(1));
+				CHECK(g2.is_node(2));
+				CHECK(g2.is_connected(1, 2));
+				CHECK(g2 == g1);
+				auto g3 = std::move(g1);
+				CHECK(g1.empty());
+				CHECK(g3.is_node(1));
+				CHECK(g3.is_node(2));
+				CHECK(g3.is_connected(1, 2));
+			}
+			SECTION("empty") {
+				auto g1 = gdwg::graph<int, std::string>{};
+				auto g2 = gdwg::graph<int, std::string>{g1};
+				CHECK(g1.empty());
+				CHECK(g2 == g1);
+				auto g3 = std::move(g1);
+				CHECK(g3.empty());
+			}
 		}
 	}
 	SECTION("Modifiers") {
@@ -351,6 +360,28 @@ TEST_CASE("gdwg::graph") {
 			auto out = std::ostringstream{};
 			out << g;
 			CHECK(out.str() == "");
+		}
+	}
+	SECTION("Comparisons") {
+		using graph = gdwg::graph<int, int>;
+		SECTION("Empty") {
+			auto g1 = graph{};
+			auto g2 = graph{};
+			CHECK(g1 == g2);
+		}
+		SECTION("nonempty equal") {
+			auto g1 = graph{1, 2};
+			g1.insert_edge(1, 2);
+			auto g2 = graph{1, 2};
+			g2.insert_edge(1, 2);
+			CHECK(g1 == g2);
+		}
+		SECTION("nonequal") {
+			auto g1 = graph{1, 2};
+			g1.insert_edge(1, 2, 3);
+			auto g2 = graph{1, 2, 3};
+			g2.insert_edge(2, 3);
+			CHECK(g1 != g2);
 		}
 	}
 }
