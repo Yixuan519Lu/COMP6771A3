@@ -356,6 +356,21 @@ namespace gdwg {
 			}
 			return false;
 		}
+		auto erase_edge(iterator i) -> iterator {
+			auto src_it = i.outer_begin_;
+			auto edge_it = i.inner_;
+			edge_it = src_it->second.erase(edge_it);
+			if (src_it->second.empty()) {
+				src_it = edges_.erase(src_it);
+			}
+			else {
+				++src_it;
+			}
+			if (src_it == i.outer_end_) {
+				return end();
+			}
+			return iterator(src_it, i.outer_end_, edge_it);
+		}
 		auto replace_node(const N& old_data, const N& new_data) -> bool {
 			if (not is_node(old_data)) {
 				throw std::runtime_error("Cannot call gdwg::graph<N, E>::replace_node on a node that doesn't exist");
