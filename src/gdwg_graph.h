@@ -346,14 +346,15 @@ namespace gdwg {
 			return res;
 		}
 		auto erase_node(const N& value) -> bool {
-			if (not is_node(value)) {
+			const auto node_sp = find_node(value);
+			if (not node_sp) {
 				return false;
 			}
-			nodes_.erase(value);
-			edges_.erase(value);
+			nodes_.erase(node_sp);
+			edges_.erase(node_sp);
 			for (auto& [src, dst_set] : edges_) {
 				for (auto it = dst_set.begin(); it != dst_set.end();) {
-					if (it->first == value) {
+					if (*(it->first) == value) {
 						it = dst_set.erase(it);
 					}
 					else {
@@ -364,20 +365,22 @@ namespace gdwg {
 			return true;
 		}
 		auto erase_edge(const N& src, const N& dst, std::optional<E> weight = std::nullopt) -> bool {
-			if (not is_node(src) or not is_node(dst)) {
+			const auto src_sp = find_node(src);
+			const auto dst_sp = find_node(dst);
+			if (not src_sp or not dst_sp) {
 				throw std::runtime_error("Cannot call gdwg::graph<N, E>::erase_edge on src or dst if they don't exist "
 				                         "in the graph");
 			}
-			const auto src_it = edges_.find(src);
+			const auto src_it = edges_.find(src_sp);
 			if (src_it == edges_.end()) {
 				return false;
 			}
 			auto& dst_set = src_it->second;
-			const auto edge_it = dst_set.find({dst, weight});
+			const auto edge_it = dst_set.find({dst_sp, weight});
 			if (edge_it != dst_set.end()) {
 				dst_set.erase(edge_it);
 				if (dst_set.empty()) {
-					edges_.erase(src);
+					edges_.erase(src_it);
 				}
 				return true;
 			}
