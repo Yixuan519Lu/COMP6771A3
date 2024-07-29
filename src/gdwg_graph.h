@@ -187,15 +187,24 @@ namespace gdwg {
 			other.clear();
 		}
 		graph(const graph& other) {
-			nodes_ = other.nodes_;
-			edges_ = other.edges_;
+			for (const auto& node : other.nodes_) {
+				auto new_node = std::make_shared<N>(*node);
+				nodes_.emplace(new_node);
+			}
+			for (const auto& [src, dst_set] : other.edges_) {
+				auto new_src = find_node(*src);
+				for (const auto& [dst, weight] : dst_set) {
+					auto new_dst = find_node(*dst);
+					edges_[new_src].emplace(new_dst, weight);
+				}
+			}
 		}
 		graph(std::initializer_list<N> il)
 		: graph(il.begin(), il.end()) {}
 		template<typename InputIt>
 		graph(InputIt first, InputIt last) {
 			for (auto ite = first; ite != last; ++ite) {
-				nodes_.emplace(*ite);
+				nodes_.emplace(std::make_shared<N>(*it));
 			}
 		}
 		auto operator=(graph&& other) noexcept -> graph& {
@@ -208,8 +217,19 @@ namespace gdwg {
 		}
 		auto operator=(const graph& other) -> graph& {
 			if (this != &other) {
-				nodes_ = other.nodes_;
-				edges_ = other.edges_;
+				nodes_.clear();
+				edges_.clear();
+				for (const auto& node : other.nodes_) {
+					auto new_node = std::make_shared<N>(*node);
+					nodes_.emplace(new_node);
+				}
+				for (const auto& [src, dst_set] : other.edges_) {
+					auto new_src = find_node(*src);
+					for (const auto& [dst, weight] : dst_set) {
+						auto new_dst = find_node(*dst);
+						edges_[new_src].emplace(new_dst, weight);
+					}
+				}
 			}
 			return *this;
 		}
@@ -488,8 +508,16 @@ namespace gdwg {
 		}
 
 	 private:
-		std::set<N> nodes_;
-		std::map<N, std::set<std::pair<N, std::optional<E>>>> edges_;
+		std::set<std::shared_ptr<N>> nodes_;
+		std::map<std::shared_ptr<N>, std::set<std::pair<std::shared_ptr<N>, std::optional<E>>>> edges_;
+		auto find_node(const N& value) const noexcept -> std::shared_ptr<N> {
+			for (const auto& node : nodes_) {
+				if (*node == value) {
+					return node;
+				}
+			}
+			return nullptr;
+		}
 	};
 } // namespace gdwg
 
