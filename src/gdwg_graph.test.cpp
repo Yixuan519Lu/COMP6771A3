@@ -314,6 +314,50 @@ TEST_CASE("gdwg::graph") {
 				}
 			}
 		}
+		SECTION("Erase edge range") {
+			SECTION("erase all") {
+				auto g = graph{1, 2, 3};
+				g.insert_edge(1, 2, 10);
+				g.insert_edge(1, 3, 20);
+				g.insert_edge(2, 3, 30);
+				auto i = g.begin();
+				auto s = g.end();
+				g.erase_edge(i, s);
+				CHECK(g.edges(1, 2).empty());
+				CHECK(g.edges(1, 3).empty());
+				CHECK(g.edges(2, 3).empty());
+			}
+
+			SECTION("erase subset") {
+				auto g = graph{1, 2, 3};
+				g.insert_edge(1, 2, 10);
+				g.insert_edge(1, 3, 20);
+				g.insert_edge(2, 3, 30);
+				g.insert_edge(3, 1, 40);
+				auto i = g.find(1, 2, 10);
+				auto s = g.find(2, 3, 30);
+				g.erase_edge(i, s);
+				CHECK(g.edges(1, 2).empty());
+				CHECK(g.edges(1, 3).empty());
+				CHECK(g.edges(2, 3).size() == 1);
+				CHECK(g.edges(3, 1).size() == 1);
+				CHECK(g.edges(2, 3)[0]->get_weight() == 30);
+				CHECK(g.edges(3, 1)[0]->get_weight() == 40);
+			}
+
+			SECTION("i=s") {
+				auto g = graph{1, 2, 3};
+				g.insert_edge(1, 2, 10);
+				g.insert_edge(1, 3, 20);
+				auto i = g.find(1, 2, 10);
+				auto s = i;
+				g.erase_edge(i, s);
+				CHECK(g.edges(1, 2).size() == 1);
+				CHECK(g.edges(1, 2)[0]->get_weight() == 10);
+				CHECK(g.edges(1, 3).size() == 1);
+				CHECK(g.edges(1, 3)[0]->get_weight() == 20);
+			}
+		}
 	}
 	SECTION("Accessors") {
 		using graph = gdwg::graph<int, int>;

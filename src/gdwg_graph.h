@@ -371,6 +371,12 @@ namespace gdwg {
 				return find(nsrc, ndst, nweight);
 			}
 		}
+		auto erase_edge(iterator i, iterator s) -> iterator {
+			while (i != s) {
+				i = erase_edge(i);
+			}
+			return s;
+		}
 		auto replace_node(const N& old_data, const N& new_data) -> bool {
 			if (not is_node(old_data)) {
 				throw std::runtime_error("Cannot call gdwg::graph<N, E>::replace_node on a node that doesn't exist");
