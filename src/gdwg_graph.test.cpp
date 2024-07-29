@@ -70,20 +70,18 @@ TEST_CASE("gdwg::graph") {
 	}
 
 	SECTION("Modifiers") {
+		using graph = gdwg::graph<int, int>;
 		SECTION("insert_node") {
-			auto g = gdwg::graph<int, std::string>{};
-
-			SECTION("Insert a new node") {
+			auto g = graph{};
+			SECTION("new node") {
 				CHECK(g.insert_node(1));
 				CHECK(g.is_node(1));
 			}
-
-			SECTION("Insert a duplicate node") {
+			SECTION("duplicate node") {
 				g.insert_node(2);
 				CHECK(not g.insert_node(2));
 			}
-
-			SECTION("Insert multiple nodes") {
+			SECTION("multiple nodes") {
 				CHECK(g.insert_node(3));
 				CHECK(g.insert_node(4));
 				CHECK(g.is_node(3));
@@ -91,13 +89,13 @@ TEST_CASE("gdwg::graph") {
 			}
 		}
 		SECTION("replace_node") {
-			auto g = gdwg::graph<int, int>{1, 2, 3};
+			auto g = graph{1, 2, 3};
 			g.insert_edge(1, 2, 1);
 			g.insert_edge(2, 3, 2);
-			SECTION("Replacing success") {
+			SECTION("success") {
 				CHECK(g.replace_node(1, 5));
 				auto nodes = g.nodes();
-				auto const expected_nodes = std::vector<int>{2, 3, 5};
+				const auto expected_nodes = std::vector<int>{2, 3, 5};
 				CHECK(nodes == expected_nodes);
 				auto edges_5_2 = g.edges(5, 2);
 				CHECK(edges_5_2.size() == 1);
@@ -106,14 +104,14 @@ TEST_CASE("gdwg::graph") {
 				CHECK(edges_2_3.size() == 1);
 				CHECK(edges_2_3[0]->get_weight() == 2);
 			}
-			SECTION("Replacing node not exists") {
+			SECTION("node not exists") {
 				CHECK_THROWS_WITH(g.replace_node(4, 5),
 				                  "Cannot call gdwg::graph<N, E>::replace_node on a node that doesn't exist");
 			}
-			SECTION("Replacing node exists") {
+			SECTION("node exists") {
 				CHECK(not g.replace_node(1, 2));
 				auto nodes = g.nodes();
-				auto const expected_nodes = std::vector<int>{1, 2, 3};
+				const auto expected_nodes = std::vector<int>{1, 2, 3};
 				CHECK(nodes == expected_nodes);
 				auto edges_1_2 = g.edges(1, 2);
 				CHECK(edges_1_2.size() == 1);
@@ -136,20 +134,20 @@ TEST_CASE("gdwg::graph") {
 				g.insert_edge(3, 2, 5);
 				g.merge_replace_node(1, 3);
 				auto nodes = g.nodes();
-				auto const expected_nodes = std::vector<int>{2, 3};
+				const auto expected_nodes = std::vector<int>{2, 3};
 				CHECK(nodes == expected_nodes);
 				auto edges_2_3 = g.edges(2, 3);
 				CHECK(edges_2_3.size() == 1);
 				CHECK(edges_2_3[0]->get_weight() == 3);
 				auto edges_3_2 = g.edges(3, 2);
 				CHECK(edges_3_2.size() == 3);
-				auto const expected_weights_3_2 = std::vector<std::optional<int>>{std::nullopt, 1, 5};
+				const auto expected_weights_3_2 = std::vector<std::optional<int>>{std::nullopt, 1, 5};
 				for (auto i = 0U; i < edges_3_2.size(); ++i) {
 					CHECK(edges_3_2[i]->get_weight() == expected_weights_3_2[i]);
 				}
 				auto edges_3_3 = g.edges(3, 3);
 				CHECK(edges_3_3.size() == 3);
-				auto const expected_weights_3_3 = std::vector<int>{2, 3, 4};
+				const auto expected_weights_3_3 = std::vector<int>{2, 3, 4};
 				for (auto i = 0U; i < edges_3_3.size(); ++i) {
 					CHECK(edges_3_3[i]->get_weight() == expected_weights_3_3[i]);
 				}
@@ -162,7 +160,7 @@ TEST_CASE("gdwg::graph") {
 
 				g.merge_replace_node('B', 'A');
 				auto nodes = g.nodes();
-				auto const expected_nodes = std::vector<char>{'A', 'C', 'D'};
+				const auto expected_nodes = std::vector<char>{'A', 'C', 'D'};
 				CHECK(nodes == expected_nodes);
 				auto edges_A_A = g.edges('A', 'A');
 				CHECK(edges_A_A.size() == 1);
@@ -177,8 +175,8 @@ TEST_CASE("gdwg::graph") {
 		}
 	}
 	SECTION("Accessors") {
+		using graph = gdwg::graph<int, int>;
 		SECTION("Graph edges()") {
-			using graph = gdwg::graph<int, int>;
 			auto g = graph{};
 			g.insert_node(1);
 			g.insert_node(2);
@@ -213,7 +211,7 @@ TEST_CASE("gdwg::graph") {
 			}
 		}
 		SECTION("is_node") {
-			auto g = gdwg::graph<int, std::string>{};
+			auto g = graph{};
 			SECTION("exists") {
 				g.insert_node(1);
 				CHECK(g.is_node(1));
@@ -221,7 +219,7 @@ TEST_CASE("gdwg::graph") {
 			}
 		}
 		SECTION("empty") {
-			auto g = gdwg::graph<int, std::string>{};
+			auto g = graph{};
 			SECTION("empty") {
 				CHECK(g.empty());
 			}
@@ -231,10 +229,10 @@ TEST_CASE("gdwg::graph") {
 			}
 		}
 		SECTION("is_connected") {
-			auto g = gdwg::graph<int, std::string>{};
+			auto g = graph{};
 			g.insert_node(1);
 			g.insert_node(2);
-			g.insert_edge(1, 2, "edge");
+			g.insert_edge(1, 2, 1);
 			SECTION("connected") {
 				CHECK(g.is_connected(1, 2));
 			}
@@ -247,8 +245,8 @@ TEST_CASE("gdwg::graph") {
 				                  "graph");
 			}
 		}
-		SECTION("nodes") {
-			auto g = gdwg::graph<int, std::string>{};
+		SECTION("Insert nodes") {
+			auto g = graph{};
 			SECTION("empty") {
 				auto nodes = g.nodes();
 				CHECK(nodes.empty());
@@ -261,8 +259,8 @@ TEST_CASE("gdwg::graph") {
 				CHECK(nodes == expected_nodes);
 			}
 		}
+
 		SECTION("Find edges") {
-			using graph = gdwg::graph<int, int>;
 			auto g = graph{};
 			g.insert_node(1);
 			g.insert_node(2);
@@ -301,7 +299,6 @@ TEST_CASE("gdwg::graph") {
 			}
 		}
 		SECTION("Connections") {
-			using graph = gdwg::graph<int, int>;
 			auto g = graph{};
 			g.insert_node(3);
 			g.insert_node(1);
@@ -314,13 +311,13 @@ TEST_CASE("gdwg::graph") {
 
 			SECTION("outgoing") {
 				auto connections = g.connections(1);
-				auto const expected_connections = std::vector<int>{2, 3, 4};
+				const auto expected_connections = std::vector<int>{2, 3, 4};
 				CHECK(connections == expected_connections);
 			}
 
 			SECTION("incoming") {
 				auto connections = g.connections(4);
-				auto const expected_connections = std::vector<int>{};
+				const auto expected_connections = std::vector<int>{};
 				CHECK(connections == expected_connections);
 			}
 
@@ -333,7 +330,7 @@ TEST_CASE("gdwg::graph") {
 	SECTION("Extractor") {
 		SECTION("Example test") {
 			using graph = gdwg::graph<int, int>;
-			auto const v = std::vector<std::tuple<int, int, std::optional<int>>>{
+			const auto v = std::vector<std::tuple<int, int, std::optional<int>>>{
 			    {4, 1, -4},
 			    {3, 2, 2},
 			    {2, 4, std::nullopt},
@@ -347,7 +344,7 @@ TEST_CASE("gdwg::graph") {
 			};
 
 			auto g = graph{};
-			for (auto const& [from, to, weight] : v) {
+			for (const auto& [from, to, weight] : v) {
 				g.insert_node(from);
 				g.insert_node(to);
 				if (weight.has_value()) {
@@ -360,7 +357,7 @@ TEST_CASE("gdwg::graph") {
 			g.insert_node(64);
 			auto out = std::ostringstream{};
 			out << g;
-			auto const expected_output = std::string_view(R"(
+			const auto expected_output = std::string_view(R"(
 1 (
   1 -> 5 | W | -1
 )
