@@ -357,19 +357,22 @@ namespace gdwg {
 			return false;
 		}
 		auto erase_edge(iterator i) -> iterator {
-			auto src_it = i.outer_begin_;
-			auto edge_it = i.inner_;
-			edge_it = src_it->second.erase(edge_it);
-			if (src_it->second.empty()) {
-				src_it = edges_.erase(src_it);
-			}
-			else {
-				++src_it;
-			}
-			if (src_it == i.outer_end_) {
+			const auto src = i.outer_begin_->first;
+			const auto dst = i.inner_->first;
+			const auto weight = i.inner_->second;
+			auto next_it = i;
+			++next_it;
+			if (next_it == end()) {
+				erase_edge(src, dst, weight);
 				return end();
 			}
-			return iterator(src_it, i.outer_end_, edge_it);
+			else {
+				const auto nsrc = next_it.outer_begin_->first;
+				const auto ndst = next_it.inner_->first;
+				const auto nweight = next_it.inner_->second;
+				erase_edge(src, dst, weight);
+				return find(nsrc, ndst, nweight);
+			}
 		}
 		auto replace_node(const N& old_data, const N& new_data) -> bool {
 			if (not is_node(old_data)) {
