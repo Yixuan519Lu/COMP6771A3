@@ -345,29 +345,15 @@ namespace gdwg {
 				return false;
 			}
 			auto& dst_set = src_it->second;
-			auto erased = false;
-			if (weight) {
-				const auto edge_it = dst_set.find({dst, *weight});
-				if (edge_it != dst_set.end()) {
-					dst_set.erase(edge_it);
-					erased = true;
+			const auto edge_it = dst_set.find({dst, weight});
+			if (edge_it != dst_set.end()) {
+				dst_set.erase(edge_it);
+				if (dst_set.empty()) {
+					edges_.erase(src);
 				}
+				return true;
 			}
-			else {
-				for (auto it = dst_set.begin(); it != dst_set.end();) {
-					if (it->first == dst) {
-						it = dst_set.erase(it);
-						erased = true;
-					}
-					else {
-						++it;
-					}
-				}
-			}
-			if (dst_set.empty()) {
-				edges_.erase(src);
-			}
-			return erased;
+			return false;
 		}
 		auto replace_node(const N& old_data, const N& new_data) -> bool {
 			if (not is_node(old_data)) {

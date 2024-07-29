@@ -208,8 +208,8 @@ TEST_CASE("gdwg::graph") {
 				CHECK(edges_1_2.size() == 4);
 				CHECK(edges_1_2[0]->get_weight() == std::nullopt);
 				CHECK(edges_1_2[1]->get_weight() == 1);
-				CHECK(edges_1_2[1]->get_weight() == 2);
-				CHECK(edges_1_2[2]->get_weight() == 3);
+				CHECK(edges_1_2[2]->get_weight() == 2);
+				CHECK(edges_1_2[3]->get_weight() == 3);
 			}
 		}
 		SECTION("Erase node") {
@@ -221,15 +221,18 @@ TEST_CASE("gdwg::graph") {
 			SECTION("node with edges") {
 				CHECK(g.erase_node(1));
 				CHECK(not g.is_node(1));
-				CHECK(not g.is_connected(1, 2));
-				CHECK(not g.is_connected(1, 3));
+				CHECK_THROWS_WITH(g.is_connected(1, 2),
+				                  "Cannot call gdwg::graph<N, E>::is_connected if src or dst node don't exist in the "
+				                  "graph");
 				CHECK(g.is_node(2));
 				CHECK(g.is_node(3));
 			}
 			SECTION("node without edges") {
 				CHECK(g.erase_node(4));
 				CHECK(not g.is_node(4));
-				CHECK(not g.is_connected(1, 4));
+				CHECK_THROWS_WITH(g.is_connected(1, 4),
+				                  "Cannot call gdwg::graph<N, E>::is_connected if src or dst node don't exist in the "
+				                  "graph");
 			}
 
 			SECTION("dne") {
