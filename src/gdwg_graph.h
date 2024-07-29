@@ -107,8 +107,9 @@ namespace gdwg {
 	class graph {
 	 private:
 		class my_iterator {
-			using inner_iterator = typename std::set<std::pair<N, std::optional<E>>>::const_iterator;
-			using outer_iterator = typename std::map<N, std::set<std::pair<N, std::optional<E>>>>::const_iterator;
+			using inner_iterator = typename std::set<std::pair<std::shared_ptr<N>, std::optional<E>>>::const_iterator;
+			using outer_iterator =
+			    typename std::map<std::shared_ptr<N>, std::set<std::pair<std::shared_ptr<N>, std::optional<E>>>>::const_iterator;
 
 		 public:
 			struct value_type {
@@ -121,7 +122,7 @@ namespace gdwg {
 			using difference_type = std::ptrdiff_t;
 			using iterator_category = std::bidirectional_iterator_tag;
 			auto operator*() -> reference {
-				return value_type{outer_begin_->first, inner_->first, inner_->second};
+				return value_type{*outer_begin_->first, *inner_->first, inner_->second};
 			}
 			auto operator++() -> my_iterator& {
 				if (outer_begin_ != outer_end_) {
@@ -157,7 +158,7 @@ namespace gdwg {
 				return temp;
 			}
 			auto operator==(my_iterator const& other) const -> bool {
-				return outer_begin_ == other.outer_begin_ && inner_ == other.inner_;
+				return outer_begin_ == other.outer_begin_ and inner_ == other.inner_;
 			}
 
 		 private:
