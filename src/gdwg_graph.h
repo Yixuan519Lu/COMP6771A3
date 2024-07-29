@@ -238,20 +238,23 @@ namespace gdwg {
 			edges_.clear();
 		}
 		auto insert_node(N const& value) noexcept -> bool {
-			return nodes_.emplace(value).second;
+			auto node = std::make_shared<N>(value);
+			return nodes_.emplace(node).second;
 		}
 		auto insert_edge(const N& src, const N& dst, std::optional<E> weight = std::nullopt) -> bool {
-			if (not is_node(src) or not is_node(dst)) {
+			auto src_sp = find_node(src);
+			auto dst_sp = find_node(dst);
+			if (not src_sp or not dst_sp) {
 				throw std::runtime_error("Cannot call gdwg::graph<N, E>::insert_edge when either src or dst node does "
 				                         "not exist");
 			}
-			auto& edge_set = edges_[src];
+			auto& edge_set = edges_[src_sp];
 			for (const auto& edge : edge_set) {
-				if (edge.first == dst and edge.second == weight) {
+				if (*edge.first == dst and edge.second == weight) {
 					return false;
 				}
 			}
-			return edge_set.emplace(dst, weight).second;
+			return edge_set.emplace(dst_sp, weight).second;
 		}
 		[[nodiscard]] auto is_node(const N& value) const noexcept -> bool {
 			return nodes_.find(value) != nodes_.end();
