@@ -173,6 +173,45 @@ TEST_CASE("gdwg::graph") {
 				CHECK(edges_D_A[0]->get_weight() == 4);
 			}
 		}
+		SECTION("Insert edges") {
+			auto g = graph{1, 2, 3};
+
+			SECTION("unweighted") {
+				CHECK(g.insert_edge(1, 2));
+				auto edges_1_2 = g.edges(1, 2);
+				CHECK(edges_1_2.size() == 1);
+				CHECK(edges_1_2[0]->get_weight() == std::nullopt);
+			}
+
+			SECTION("weighted") {
+				CHECK(g.insert_edge(1, 2, 1));
+				auto edges_1_2 = g.edges(1, 2);
+				CHECK(edges_1_2.size() == 1);
+				CHECK(edges_1_2[0]->get_weight() == 1);
+			}
+
+			SECTION("duplicate unweighted") {
+				g.insert_edge(1, 2);
+				CHECK(not g.insert_edge(1, 2));
+				auto edges_1_2 = g.edges(1, 2);
+				CHECK(edges_1_2.size() == 1);
+				CHECK(edges_1_2[0]->get_weight() == std::nullopt);
+			}
+
+			SECTION("multiple weighted") {
+				g.insert_edge(1, 2, 1);
+				CHECK(not g.insert_edge(1, 2, 1));
+				g.insert_edge(1, 2);
+				g.insert_edge(1, 2, 3);
+				g.insert_edge(1, 2, 2);
+				auto edges_1_2 = g.edges(1, 2);
+				CHECK(edges_1_2.size() == 4);
+				CHECK(edges_1_2[0]->get_weight() == std::nullopt);
+				CHECK(edges_1_2[1]->get_weight() == 1);
+				CHECK(edges_1_2[1]->get_weight() == 2);
+				CHECK(edges_1_2[2]->get_weight() == 3);
+			}
+		}
 	}
 	SECTION("Accessors") {
 		using graph = gdwg::graph<int, int>;
