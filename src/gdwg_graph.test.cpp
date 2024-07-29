@@ -236,6 +236,36 @@ TEST_CASE("gdwg::graph") {
 				CHECK(not g.erase_node(5));
 			}
 		}
+		SECTION("Erase edge") {
+			auto g = graph{1, 2, 3};
+			g.insert_edge(1, 2, 10);
+			g.insert_edge(1, 3, 20);
+			g.insert_edge(2, 3, 30);
+			g.insert_edge(1, 2);
+			SECTION("weighted edge") {
+				CHECK(g.erase_edge(1, 2, 10));
+				auto edges_1_2 = g.edges(1, 2);
+				CHECK(edges_1_2.size() == 1);
+				CHECK(edges_1_2[0]->get_weight() == std::nullopt);
+			}
+			SECTION("unweighted edge") {
+				CHECK(g.erase_edge(1, 2));
+				auto edges_1_2 = g.edges(1, 2);
+				CHECK(edges_1_2.size() == 1);
+				CHECK(edges_1_2[0]->get_weight() == 10);
+			}
+			SECTION("edge dne") {
+				CHECK(not g.erase_edge(1, 2, 15));
+			}
+			SECTION("node dne") {
+				CHECK_THROWS_WITH(g.erase_edge(4, 2),
+				                  "Cannot call gdwg::graph<N, E>::erase_edge on src or dst if they don't exist in the "
+				                  "graph");
+				CHECK_THROWS_WITH(g.erase_edge(1, 4),
+				                  "Cannot call gdwg::graph<N, E>::erase_edge on src or dst if they don't exist in the "
+				                  "graph");
+			}
+		}
 	}
 	SECTION("Accessors") {
 		using graph = gdwg::graph<int, int>;
