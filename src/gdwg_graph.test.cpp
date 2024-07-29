@@ -4,17 +4,16 @@
 
 TEST_CASE("gdwg::graph") {
 	SECTION("Constructors") {
+		using graph = gdwg::graph<int, int>;
 		SECTION("Default constructor") {
-			auto g1 = gdwg::graph<int, std::string>{};
+			auto g1 = graph{};
 			CHECK(g1.empty());
-			auto g2 = gdwg::graph<double, double>{};
-			CHECK(g2.empty());
 		}
 		SECTION("Copy and Move constructor") {
 			SECTION("nonempty") {
-				auto g1 = gdwg::graph<int, std::string>{1, 2};
-				g1.insert_edge(1, 2, "a");
-				auto g2 = gdwg::graph<int, std::string>{g1};
+				auto g1 = graph{1, 2};
+				g1.insert_edge(1, 2, 2);
+				auto g2 = graph{g1};
 				CHECK(g2.is_node(1));
 				CHECK(g2.is_node(2));
 				CHECK(g2.is_connected(1, 2));
@@ -26,15 +25,50 @@ TEST_CASE("gdwg::graph") {
 				CHECK(g3.is_connected(1, 2));
 			}
 			SECTION("empty") {
-				auto g1 = gdwg::graph<int, std::string>{};
-				auto g2 = gdwg::graph<int, std::string>{g1};
+				auto g1 = graph{};
+				auto g2 = graph{g1};
 				CHECK(g1.empty());
 				CHECK(g2 == g1);
 				auto g3 = std::move(g1);
 				CHECK(g3.empty());
 			}
 		}
+		SECTION("Initializer list constructor") {
+			auto g = graph{1, 2, 3};
+			CHECK(g.is_node(1));
+			CHECK(g.is_node(2));
+			CHECK(g.is_node(3));
+			CHECK(not g.is_connected(1, 2));
+		}
+
+		SECTION("Range constructor") {
+			auto nodes = std::vector<int>{1, 2, 3};
+			auto g = graph(nodes.begin(), nodes.end());
+			CHECK(g.is_node(1));
+			CHECK(g.is_node(2));
+			CHECK(g.is_node(3));
+			CHECK(not g.is_connected(1, 2));
+		}
+		SECTION("Copy and Move assignment operator") {
+			auto g1 = graph{1, 2};
+			g1.insert_edge(1, 2, 2);
+			auto g2 = graph{};
+			g2 = std::move(g1);
+			CHECK(g1.empty());
+			CHECK(g2.is_node(1));
+			CHECK(g2.is_node(2));
+			CHECK(g2.is_connected(1, 2));
+			auto edges_1_2 = g2.edges(1, 2);
+			CHECK(edges_1_2.size() == 1);
+			CHECK(edges_1_2[0]->get_weight() == 2);
+			auto g3 = graph{};
+			g3 = g2;
+			CHECK(g3 == g2);
+			CHECK(edges_1_2.size() == 1);
+			CHECK(edges_1_2[0]->get_weight() == 2);
+		}
 	}
+
 	SECTION("Modifiers") {
 		SECTION("insert_node") {
 			auto g = gdwg::graph<int, std::string>{};
