@@ -240,8 +240,12 @@ namespace gdwg {
 			edges_.clear();
 		}
 		auto insert_node(N const& value) noexcept -> bool {
-			auto node = std::make_shared<N>(value);
-			return nodes_.emplace(node).second;
+			for (const auto& node : nodes_) {
+				if (*node == value) {
+					return false;
+				}
+			}
+			return nodes_.emplace(std::make_shared<N>(value)).second;
 		}
 		auto insert_edge(const N& src, const N& dst, std::optional<E> weight = std::nullopt) -> bool {
 			const auto src_sp = find_node(src);
@@ -269,6 +273,7 @@ namespace gdwg {
 			for (const auto& node : nodes_) {
 				res.push_back(*node);
 			}
+			std::sort(res.begin(), res.end());
 			return res;
 		}
 		[[nodiscard]] auto is_connected(const N& src, const N& dst) -> bool {
@@ -309,6 +314,7 @@ namespace gdwg {
 					}
 				}
 			}
+			std::sort(res.begin(), res.end());
 			return res;
 		}
 		[[nodiscard]] auto find(N const& src, N const& dst, std::optional<E> weight = std::nullopt) -> iterator {
