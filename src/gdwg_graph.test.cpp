@@ -358,6 +358,14 @@ TEST_CASE("gdwg::graph") {
 				CHECK(g.edges(1, 3)[0]->get_weight() == 20);
 			}
 		}
+		SECTION("clear") {
+			auto g = graph{1, 2, 3};
+			g.insert_edge(1, 2, 10);
+			g.insert_edge(1, 3, 20);
+			g.insert_edge(2, 3, 30);
+			g.clear();
+			CHECK(g.empty());
+		}
 	}
 	SECTION("Accessors") {
 		using graph = gdwg::graph<int, int>;
