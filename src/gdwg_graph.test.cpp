@@ -212,6 +212,30 @@ TEST_CASE("gdwg::graph") {
 				CHECK(edges_1_2[2]->get_weight() == 3);
 			}
 		}
+		SECTION("Erase node") {
+			auto g = graph{1, 2, 3, 4};
+			g.insert_edge(1, 2, 10);
+			g.insert_edge(1, 3, 20);
+			g.insert_edge(2, 3, 30);
+			g.insert_edge(3, 1, 30);
+			SECTION("node with edges") {
+				CHECK(g.erase_node(1));
+				CHECK(not g.is_node(1));
+				CHECK(not g.is_connected(1, 2));
+				CHECK(not g.is_connected(1, 3));
+				CHECK(g.is_node(2));
+				CHECK(g.is_node(3));
+			}
+			SECTION("node without edges") {
+				CHECK(g.erase_node(4));
+				CHECK(not g.is_node(4));
+				CHECK(not g.is_connected(1, 4));
+			}
+
+			SECTION("dne") {
+				CHECK(not g.erase_node(5));
+			}
+		}
 	}
 	SECTION("Accessors") {
 		using graph = gdwg::graph<int, int>;
