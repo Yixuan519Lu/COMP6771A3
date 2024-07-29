@@ -289,13 +289,14 @@ namespace gdwg {
 			if (not is_node(src) or not is_node(dst)) {
 				return end();
 			}
-			const auto edge_it = edges_.find(src);
-			if (edge_it != edges_.end()) {
-				for (auto inner_it = edge_it->second.begin(); inner_it != edge_it->second.end(); ++inner_it) {
-					if (inner_it->first == dst and inner_it->second == weight) {
-						return iterator(edge_it, edges_.end(), inner_it);
-					}
-				}
+			const auto src_it = edges_.find(src);
+			if (src_it == edges_.end()) {
+				return end();
+			}
+			const auto& dst_set = src_it->second;
+			const auto edge_it = dst_set.find({dst, weight});
+			if (edge_it != dst_set.end()) {
+				return iterator(src_it, edges_.end(), edge_it);
 			}
 			return end();
 		}
