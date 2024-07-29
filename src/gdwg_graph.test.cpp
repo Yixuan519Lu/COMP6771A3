@@ -452,7 +452,44 @@ TEST_CASE("gdwg::graph") {
 				CHECK(nodes == expected_nodes);
 			}
 		}
-
+		SECTION("is_connected") {
+			auto g = graph{};
+			g.insert_node(1);
+			g.insert_node(2);
+			g.insert_node(3);
+			g.insert_edge(1, 2, 10);
+			SECTION("connected") {
+				CHECK(g.is_connected(1, 2));
+			}
+			SECTION("not connected") {
+				CHECK(not g.is_connected(2, 3));
+			}
+			SECTION("exception") {
+				CHECK_THROWS_WITH(g.is_connected(4, 2),
+				                  "Cannot call gdwg::graph<N, E>::is_connected if src or dst node don't exist in the "
+				                  "graph");
+				CHECK_THROWS_WITH(g.is_connected(1, 4),
+				                  "Cannot call gdwg::graph<N, E>::is_connected if src or dst node don't exist in the "
+				                  "graph");
+			}
+		}
+		SECTION("nodes") {
+			auto g = graph{};
+			g.insert_node(1);
+			g.insert_node(2);
+			g.insert_node(3);
+			SECTION("nonept") {
+				auto nodes = g.nodes();
+				auto expected_nodes = std::vector<int>{1, 2, 3};
+				CHECK(nodes == expected_nodes);
+			}
+			SECTION("ept") {
+				auto ept = graph{};
+				auto nodes = ept.nodes();
+				auto expected_nodes = std::vector<int>{};
+				CHECK(nodes == expected_nodes);
+			}
+		}
 		SECTION("Find edges") {
 			auto g = graph{};
 			g.insert_node(1);
