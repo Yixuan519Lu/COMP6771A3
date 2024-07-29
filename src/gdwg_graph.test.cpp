@@ -269,6 +269,51 @@ TEST_CASE("gdwg::graph") {
 				                  "graph");
 			}
 		}
+		SECTION("Erase edge iterator i") {
+			SECTION("single edge") {
+				auto g = graph{1, 2, 3};
+				g.insert_edge(1, 2, 10);
+				auto it = g.find(1, 2, 10);
+				it = g.erase_edge(it);
+				CHECK(it == g.end());
+				auto edges_1_2 = g.edges(1, 2);
+				CHECK(edges_1_2.empty());
+			}
+			SECTION("return next iterator") {
+				auto g = graph{1, 2, 3};
+				g.insert_edge(1, 2, 10);
+				g.insert_edge(1, 3, 20);
+				auto it = g.find(1, 2, 10);
+				it = g.erase_edge(it);
+				CHECK(it != g.end());
+				CHECK(it == g.find(1, 3, 20));
+			}
+			SECTION("Erase all edges from a node") {
+				auto g = graph{1, 2, 3};
+				g.insert_edge(1, 2, 10);
+				g.insert_edge(1, 3, 20);
+				g.insert_edge(2, 3, 20);
+				auto it = g.find(1, 2, 10);
+				it = g.erase_edge(it);
+				it = g.erase_edge(it);
+				CHECK(it == g.find(2, 3, 20));
+			}
+			SECTION("all edges") {
+				auto g = graph{1, 2, 3};
+				g.insert_edge(1, 2, 10);
+				g.insert_edge(1, 3, 20);
+				g.insert_edge(2, 3, 30);
+				auto it = g.begin();
+				it = g.erase_edge(it);
+				CHECK(it == g.find(1, 3, 20));
+				for (auto it = g.begin(); it != g.end();) {
+					it = g.erase_edge(it);
+				}
+				for (auto node : g.nodes()) {
+					CHECK(g.connections(node).empty());
+				}
+			}
+		}
 	}
 	SECTION("Accessors") {
 		using graph = gdwg::graph<int, int>;
