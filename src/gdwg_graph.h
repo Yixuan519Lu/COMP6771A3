@@ -243,9 +243,7 @@ namespace gdwg {
 			return nodes_.emplace(node).second;
 		}
 		auto insert_edge(const N& src, const N& dst, std::optional<E> weight = std::nullopt) -> bool {
-			auto src_sp = find_node(src);
-			auto dst_sp = find_node(dst);
-			if (not src_sp or not dst_sp) {
+			if (not is_node(src) or not is_node(dst)) {
 				throw std::runtime_error("Cannot call gdwg::graph<N, E>::insert_edge when either src or dst node does "
 				                         "not exist");
 			}
@@ -271,9 +269,7 @@ namespace gdwg {
 			return res;
 		}
 		[[nodiscard]] auto is_connected(const N& src, const N& dst) -> bool {
-			const auto src_sp = find_node(src);
-			const auto dst_sp = find_node(dst);
-			if (not src_sp or not dst_sp) {
+			if (not is_node(src) or not is_node(dst)) {
 				throw std::runtime_error("Cannot call gdwg::graph<N, E>::is_connected if src or dst node don't exist "
 				                         "in the graph");
 			}
@@ -288,9 +284,7 @@ namespace gdwg {
 			return false;
 		}
 		[[nodiscard]] auto edges(const N& src, const N& dst) -> std::vector<std::unique_ptr<edge<N, E>>> {
-			const auto src_sp = find_node(src);
-			const auto dst_sp = find_node(dst);
-			if (not src_sp or not dst_sp) {
+			if (not is_node(src) or not is_node(dst)) {
 				throw std::runtime_error("Cannot call gdwg::graph<N, E>::edges if src or dst node don't exist in the "
 				                         "graph");
 			}
@@ -311,9 +305,7 @@ namespace gdwg {
 			return res;
 		}
 		[[nodiscard]] auto find(N const& src, N const& dst, std::optional<E> weight = std::nullopt) -> iterator {
-			const auto src_sp = find_node(src);
-			const auto dst_sp = find_node(dst);
-			if (not src_sp or not dst_sp) {
+			if (not is_node(src) or not is_node(dst)) {
 				return end();
 			}
 			const auto src_it = edges_.find(src_sp);
@@ -328,8 +320,7 @@ namespace gdwg {
 			return end();
 		}
 		[[nodiscard]] auto connections(N const& src) -> std::vector<N> {
-			const auto src_sp = find_node(src);
-			if (not src_sp) {
+			if (not is_node(src)) {
 				throw std::runtime_error("Cannot call gdwg::graph<N, E>::connections if src doesn't exist in the "
 				                         "graph");
 			}
@@ -347,8 +338,7 @@ namespace gdwg {
 			return res;
 		}
 		auto erase_node(const N& value) -> bool {
-			const auto node_sp = find_node(value);
-			if (not node_sp) {
+			if (not is_node(value)) {
 				return false;
 			}
 			nodes_.erase(node_sp);
@@ -366,9 +356,7 @@ namespace gdwg {
 			return true;
 		}
 		auto erase_edge(const N& src, const N& dst, std::optional<E> weight = std::nullopt) -> bool {
-			const auto src_sp = find_node(src);
-			const auto dst_sp = find_node(dst);
-			if (not src_sp or not dst_sp) {
+			if (not is_node(src) or not is_node(dst)) {
 				throw std::runtime_error("Cannot call gdwg::graph<N, E>::erase_edge on src or dst if they don't exist "
 				                         "in the graph");
 			}
@@ -421,17 +409,19 @@ namespace gdwg {
 			if (old_data == new_data) {
 				return true;
 			}
-			nodes_.emplace(new_data);
-			if (auto it = edges_.find(old_data); it != edges_.end()) {
+			auto old_node_sp = find_node(old_data);
+			auto new_node_sp = std::make_shared<N>(new_data);
+			nodes_.emplace(new_node_sp);
+			if (auto it = edges_.find(old_node_sp); it != edges_.end()) {
 				for (const auto& edge : it->second) {
-					edges_[new_data].emplace(edge);
+					edges_[new_node_sp].emplace(edge);
 				}
 				edges_.erase(it);
 			}
 			for (auto& [src, dst_set] : edges_) {
 				for (auto it = dst_set.begin(); it != dst_set.end();) {
-					if (it->first == old_data) {
-						dst_set.emplace(new_data, it->second);
+					if (*(it->first) == old_data) {
+						dst_set.emplace(new_node_sp, it->second);
 						it = dst_set.erase(it);
 					}
 					else {
@@ -439,23 +429,25 @@ namespace gdwg {
 					}
 				}
 			}
-			nodes_.erase(old_data);
+			nodes_.erase(old_node_sp);
 			return true;
 		}
 		auto merge_replace_node(const N& old_data, const N& new_data) -> void {
-			if (not is_node(old_data) || not is_node(new_data)) {
+			if (not is_node(old_data) or not is_node(new_data)) {
 				throw std::runtime_error("Cannot call gdwg::graph<N, E>::merge_replace_node on old or new data if they "
 				                         "don't exist in the graph");
 			}
 			if (old_data == new_data) {
 				return;
 			}
-			if (auto it = edges_.find(old_data); it != edges_.end()) {
+			auto old_node_sp = find_node(old_data);
+			auto new_node_sp = find_node(new_data);
+			if (auto it = edges_.find(old_node_sp); it != edges_.end()) {
 				for (const auto& edge : it->second) {
-					auto& new_dst_set = edges_[new_data];
+					auto& new_dst_set = edges_[new_node_sp];
 					auto exists = false;
 					for (const auto& new_edge : new_dst_set) {
-						if (new_edge.first == edge.first and new_edge.second == edge.second) {
+						if (*(new_edge.first) == *(edge.first) and new_edge.second == edge.second) {
 							exists = true;
 							break;
 						}
@@ -468,16 +460,16 @@ namespace gdwg {
 			}
 			for (auto& [src, dst_set] : edges_) {
 				for (auto it = dst_set.begin(); it != dst_set.end();) {
-					if (it->first == old_data) {
+					if (*(it->first) == old_data) {
 						auto exists = false;
 						for (const auto& new_edge : dst_set) {
-							if (new_edge.first == new_data and new_edge.second == it->second) {
+							if (*(new_edge.first) == new_data and new_edge.second == it->second) {
 								exists = true;
 								break;
 							}
 						}
 						if (not exists) {
-							dst_set.emplace(new_data, it->second);
+							dst_set.emplace(new_node_sp, it->second);
 						}
 						it = dst_set.erase(it);
 					}
@@ -486,7 +478,7 @@ namespace gdwg {
 					}
 				}
 			}
-			nodes_.erase(old_data);
+			nodes_.erase(old_node_sp);
 		}
 		friend auto operator<<(std::ostream& os, graph const& g) -> std::ostream& {
 			if (g.nodes_.empty()) {
