@@ -314,15 +314,14 @@ namespace gdwg {
 					}
 				}
 			}
-			std::sort(res.begin(), res.end());
 			return res;
 		}
 		[[nodiscard]] auto find(N const& src, N const& dst, std::optional<E> weight = std::nullopt) -> iterator {
-			const auto src_sp = find_node(src);
-			const auto dst_sp = find_node(dst);
 			if (not is_node(src) or not is_node(dst)) {
 				return end();
 			}
+			const auto src_sp = find_node(src);
+			const auto dst_sp = find_node(dst);
 			const auto src_it = edges_.find(src_sp);
 			if (src_it == edges_.end()) {
 				return end();

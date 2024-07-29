@@ -139,14 +139,18 @@ TEST_CASE("gdwg::graph") {
 				auto edges_3_2 = g.edges(3, 2);
 				CHECK(edges_3_2.size() == 3);
 				const auto expected_weights_3_2 = std::vector<std::optional<int>>{std::nullopt, 1, 5};
-				for (auto i = 0U; i < edges_3_2.size(); ++i) {
-					CHECK(edges_3_2[i]->get_weight() == expected_weights_3_2[i]);
+				auto expected_it = expected_weights_3_2.begin();
+				for (const auto& edge : edges_3_2) {
+					CHECK(edge->get_weight() == *expected_it);
+					++expected_it;
 				}
 				auto edges_3_3 = g.edges(3, 3);
 				CHECK(edges_3_3.size() == 3);
 				const auto expected_weights_3_3 = std::vector<int>{2, 3, 4};
-				for (auto i = 0U; i < edges_3_3.size(); ++i) {
-					CHECK(edges_3_3[i]->get_weight() == expected_weights_3_3[i]);
+				auto expected_it_3_3 = expected_weights_3_3.begin();
+				for (const auto& edge : edges_3_3) {
+					CHECK(edge->get_weight() == *expected_it_3_3);
+					++expected_it_3_3;
 				}
 			}
 			SECTION("Merging success 2") {
