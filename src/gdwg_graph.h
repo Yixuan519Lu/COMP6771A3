@@ -486,16 +486,16 @@ namespace gdwg {
 			}
 			os << "\n";
 			for (const auto& node : g.nodes_) {
-				os << node << " (\n";
+				os << *node << " (\n";
 				if (auto it = g.edges_.find(node); it != g.edges_.end()) {
 					for (const auto& edge_pair : it->second) {
 						if (edge_pair.second == std::nullopt) {
-							os << "  " << node << " -> " << edge_pair.first << " | U\n";
+							os << "  " << *node << " -> " << *(edge_pair.first) << " | U\n";
 						}
 					}
 					for (const auto& edge_pair : it->second) {
 						if (edge_pair.second != std::nullopt) {
-							os << "  " << node << " -> " << edge_pair.first << " | W | " << *edge_pair.second << "\n";
+							os << "  " << *node << " -> " << *(edge_pair.first) << " | W | " << *edge_pair.second << "\n";
 						}
 					}
 				}
@@ -510,7 +510,46 @@ namespace gdwg {
 			return iterator(edges_.cend(), edges_.cend());
 		}
 		[[nodiscard]] auto operator==(graph const& other) const -> bool {
-			return nodes_ == other.nodes_ and edges_ == other.edges_;
+			if (nodes_.size() != other.nodes_.size() or edges_.size() != other.edges_.size()) {
+				return false;
+			}
+			for (const auto& node : nodes_) {
+				auto found = false;
+				for (const auto& other_node : other.nodes_) {
+					if (*node == *other_node) {
+						found = true;
+						break;
+					}
+				}
+				if (not found) {
+					return false;
+				}
+			}
+			for (const auto& [src, dst_set] : edges_) {
+				const auto other_it = std::find_if(other.edges_.begin(), other.edges_.end(), [&](const auto& other_pair) {
+					return *src == *other_pair.first;
+				});
+				if (other_it == other.edges_.end()) {
+					return false;
+				}
+				const auto& other_dst_set = other_it->second;
+				if (dst_set.size() != other_dst_set.size()) {
+					return false;
+				}
+				for (const auto& edge : dst_set) {
+					auto found = false;
+					for (const auto& other_edge : other_dst_set) {
+						if (*edge.first == *other_edge.first and edge.second == other_edge.second) {
+							found = true;
+							break;
+						}
+					}
+					if (not found) {
+						return false;
+					}
+				}
+			}
+			return true;
 		}
 
 	 private:
