@@ -394,15 +394,15 @@ namespace gdwg {
 			auto next_it = i;
 			++next_it;
 			if (next_it == end()) {
-				erase_edge(src, dst, weight);
+				erase_edge(*src, *dst, weight);
 				return end();
 			}
 			else {
 				const auto nsrc = next_it.outer_begin_->first;
 				const auto ndst = next_it.inner_->first;
 				const auto nweight = next_it.inner_->second;
-				erase_edge(src, dst, weight);
-				return find(nsrc, ndst, nweight);
+				erase_edge(*src, *dst, weight);
+				return find(*nsrc, *ndst, nweight);
 			}
 		}
 		auto erase_edge(iterator i, iterator s) -> iterator {
