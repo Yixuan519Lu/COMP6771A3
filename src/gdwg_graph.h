@@ -350,6 +350,7 @@ namespace gdwg {
 					}
 				}
 			}
+			std::sort(res.begin(), res.end());
 			return res;
 		}
 		auto erase_node(const N& value) -> bool {
@@ -503,15 +504,24 @@ namespace gdwg {
 				return os;
 			}
 			os << "\n";
-			for (const auto& node : g.nodes_) {
+			auto nodes = std::vector<std::shared_ptr<N>>(g.nodes_.begin(), g.nodes_.end());
+			std::sort(nodes.begin(), nodes.end(), [](const std::shared_ptr<N>& a, const std::shared_ptr<N>& b) {
+				return *a < *b;
+			});
+			for (const auto& node : nodes) {
 				os << *node << " (\n";
 				if (auto it = g.edges_.find(node); it != g.edges_.end()) {
-					for (const auto& edge_pair : it->second) {
+					auto edges = std::vector<std::pair<std::shared_ptr<N>, std::optional<E>>>(it->second.begin(),
+					                                                                          it->second.end());
+					std::sort(edges.begin(), edges.end(), [](const auto& a, const auto& b) {
+						return *a.first < *b.first;
+					});
+					for (const auto& edge_pair : edges) {
 						if (edge_pair.second == std::nullopt) {
 							os << "  " << *node << " -> " << *(edge_pair.first) << " | U\n";
 						}
 					}
-					for (const auto& edge_pair : it->second) {
+					for (const auto& edge_pair : edges) {
 						if (edge_pair.second != std::nullopt) {
 							os << "  " << *node << " -> " << *(edge_pair.first) << " | W | " << *edge_pair.second << "\n";
 						}
