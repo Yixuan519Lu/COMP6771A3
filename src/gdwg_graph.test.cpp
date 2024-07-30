@@ -297,6 +297,15 @@ TEST_CASE("gdwg::graph") {
 				auto it = g.find(1, 2, 10);
 				it = g.erase_edge(it);
 				it = g.erase_edge(it);
+				auto edges_1_2 = g.edges(1, 3);
+				CHECK(edges_1_2.empty());
+				auto edges_1_3 = g.edges(1, 3);
+				CHECK(edges_1_3.empty());
+				auto edge = *(g.find(2, 3, 20));
+				CHECK(edge.from == 2);
+				CHECK(edge.to == 3);
+				CHECK(edge.weight == 20);
+				CHECK(it == g.find(2, 3, 20));
 				CHECK(it == g.find(2, 3, 20));
 			}
 			SECTION("all edges") {
