@@ -134,6 +134,9 @@ namespace gdwg {
 							inner_ = outer_begin_->second.begin();
 						}
 					}
+					if (outer_begin_ == outer_end_) {
+						inner_ = inner_iterator{};
+					}
 				}
 				return *this;
 			}
