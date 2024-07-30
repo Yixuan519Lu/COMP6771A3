@@ -144,7 +144,8 @@ namespace gdwg {
 			}
 			auto operator--() -> my_iterator& {
 				if (outer_begin_ == outer_end_) {
-					return *this;
+					--outer_begin_;
+					inner_ = outer_begin_->second.end();
 				}
 				while (inner_ == outer_begin_->second.begin()) {
 					--outer_begin_;

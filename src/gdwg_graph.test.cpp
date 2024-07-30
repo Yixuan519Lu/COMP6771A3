@@ -368,6 +368,53 @@ TEST_CASE("gdwg::graph") {
 			CHECK(g.empty());
 		}
 	}
+	SECTION("Iterator tests") {
+		using graph = gdwg::graph<int, int>;
+		SECTION("traverse") {
+			auto g = graph{1, 2, 3};
+			g.insert_edge(1, 2, 10);
+			g.insert_edge(2, 3, 20);
+			auto it = g.begin();
+			auto edge = *it;
+			CHECK(edge.from == 1);
+			CHECK(edge.to == 2);
+			CHECK(edge.weight == 10);
+			++it;
+			edge = *it;
+			CHECK(edge.from == 2);
+			CHECK(edge.to == 3);
+			CHECK(edge.weight == 20);
+			++it;
+			CHECK(it == g.end());
+		}
+		SECTION("++ and --") {
+			auto g = graph{1, 2, 3};
+			g.insert_edge(1, 2, 10);
+			g.insert_edge(2, 3, 20);
+			auto it = g.begin();
+			++it;
+			++it;
+			--it;
+			--it;
+			auto edge = *it;
+			CHECK(edge.from == 1);
+			CHECK(edge.to == 2);
+			CHECK(edge.weight == 10);
+		}
+		SECTION("Comparison") {
+			auto g = graph{1, 2, 3};
+			g.insert_edge(1, 2, 10);
+			g.insert_edge(2, 3, 20);
+			auto it1 = g.begin();
+			auto it2 = g.begin();
+			CHECK(it1 == it2);
+			++it1;
+			CHECK(it1 != it2);
+			auto it3 = g.end();
+			auto it4 = g.end();
+			CHECK(it3 == it4);
+		}
+	}
 	SECTION("Accessors") {
 		using graph = gdwg::graph<int, int>;
 		SECTION("Graph edges()") {
