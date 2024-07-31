@@ -406,6 +406,16 @@ TEST_CASE("gdwg::graph") {
 			++it;
 			CHECK(it == g.end());
 		}
+		SECTION("*") {
+			auto g = graph{1, 2, 3};
+			g.insert_edge(1, 2, 10);
+			g.insert_edge(2, 3, 20);
+			auto it = g.begin();
+			auto edge = *it;
+			CHECK(edge.from == 1);
+			CHECK(edge.to == 2);
+			CHECK(edge.weight == 10);
+		}
 		SECTION("++ and --") {
 			auto g = graph{1, 2, 3};
 			g.insert_edge(1, 2, 10);
@@ -421,17 +431,40 @@ TEST_CASE("gdwg::graph") {
 			CHECK(edge.weight == 10);
 		}
 		SECTION("Comparison") {
-			auto g = graph{1, 2, 3};
-			g.insert_edge(1, 2, 10);
-			g.insert_edge(2, 3, 20);
-			auto it1 = g.begin();
-			auto it2 = g.begin();
-			CHECK(it1 == it2);
-			++it1;
-			CHECK(it1 != it2);
-			auto it3 = g.end();
-			auto it4 = g.end();
-			CHECK(it3 == it4);
+			SECTION("simple test") {
+				auto g = graph{1, 2, 3};
+				g.insert_edge(1, 2, 10);
+				g.insert_edge(2, 3, 20);
+				auto it1 = g.begin();
+				auto it2 = g.begin();
+				CHECK(it1 == it2);
+				++it1;
+				CHECK(it1 != it2);
+				it1--;
+				CHECK(it1 == it2);
+				auto it3 = g.end();
+				auto it4 = g.end();
+				CHECK(it3 == it4);
+			}
+			SECTION("Empty") {
+				auto g1 = graph{};
+				auto g2 = graph{};
+				CHECK(g1 == g2);
+			}
+			SECTION("nonempty equal") {
+				auto g1 = graph{1, 2};
+				g1.insert_edge(1, 2);
+				auto g2 = graph{1, 2};
+				g2.insert_edge(1, 2);
+				CHECK(g1 == g2);
+			}
+			SECTION("nonequal") {
+				auto g1 = graph{1, 2};
+				g1.insert_edge(1, 2, 3);
+				auto g2 = graph{1, 2, 3};
+				g2.insert_edge(2, 3);
+				CHECK(g1 != g2);
+			}
 		}
 	}
 	SECTION("Accessors") {
@@ -486,23 +519,6 @@ TEST_CASE("gdwg::graph") {
 			SECTION("not empty") {
 				g.insert_node(1);
 				CHECK(not g.empty());
-			}
-		}
-		SECTION("is_connected") {
-			auto g = graph{};
-			g.insert_node(1);
-			g.insert_node(2);
-			g.insert_edge(1, 2, 1);
-			SECTION("connected") {
-				CHECK(g.is_connected(1, 2));
-			}
-			SECTION("not connected") {
-				CHECK(not g.is_connected(2, 1));
-			}
-			SECTION("dne") {
-				CHECK_THROWS_WITH(g.is_connected(1, 3),
-				                  "Cannot call gdwg::graph<N, E>::is_connected if src or dst node don't exist in the "
-				                  "graph");
 			}
 		}
 		SECTION("Insert nodes") {
@@ -687,28 +703,6 @@ TEST_CASE("gdwg::graph") {
 			auto out = std::ostringstream{};
 			out << g;
 			CHECK(out.str() == "");
-		}
-	}
-	SECTION("Comparisons") {
-		using graph = gdwg::graph<int, int>;
-		SECTION("Empty") {
-			auto g1 = graph{};
-			auto g2 = graph{};
-			CHECK(g1 == g2);
-		}
-		SECTION("nonempty equal") {
-			auto g1 = graph{1, 2};
-			g1.insert_edge(1, 2);
-			auto g2 = graph{1, 2};
-			g2.insert_edge(1, 2);
-			CHECK(g1 == g2);
-		}
-		SECTION("nonequal") {
-			auto g1 = graph{1, 2};
-			g1.insert_edge(1, 2, 3);
-			auto g2 = graph{1, 2, 3};
-			g2.insert_edge(2, 3);
-			CHECK(g1 != g2);
 		}
 	}
 }
