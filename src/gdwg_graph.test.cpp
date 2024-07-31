@@ -723,3 +723,39 @@ TEST_CASE("gdwg::graph") {
 		}
 	}
 }
+TEST_CASE("weighted edge") {
+	using weighted_str = gdwg::weighted_edge<std::string, std::string>;
+	using weighted_int = gdwg::weighted_edge<int, int>;
+	SECTION("Constructor") {
+		auto we1 = weighted_str("A", "B", "ABC");
+		auto nodes_1 = we1.get_nodes();
+		REQUIRE(nodes_1.first == "A");
+		REQUIRE(nodes_1.second == "B");
+		auto we2 = weighted_int(1, 2, 10);
+		auto nodes_2 = we2.get_nodes();
+		REQUIRE(nodes_2.first == 1);
+		REQUIRE(nodes_2.second == 2);
+	}
+	SECTION("get_nodes") {
+		auto we = weighted_str("A", "B", "ABC");
+		auto nodes = we.get_nodes();
+		REQUIRE(nodes.first == "A");
+		REQUIRE(nodes.second == "B");
+	}
+	SECTION("get_weight and is_weighted") {
+		auto we = weighted_str("A", "B", "ABC");
+		REQUIRE(we.get_weight() == "ABC");
+		REQUIRE(we.is_weighted() == true);
+	}
+	SECTION("print_edge") {
+		auto we = weighted_str("A", "B", "ABC");
+		REQUIRE(we.print_edge() == "A -> B | W | ABC");
+	}
+	SECTION("operator==") {
+		auto we1 = weighted_str("A", "B", "ABC");
+		auto we2 = weighted_str("A", "B", "ABC");
+		auto we3 = weighted_str("Aa", "Ba", "AaBbCc");
+		REQUIRE(we1 == we2);
+		REQUIRE(!(we1 == we3));
+	}
+}
