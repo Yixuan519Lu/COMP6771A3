@@ -759,3 +759,39 @@ TEST_CASE("weighted edge") {
 		REQUIRE(!(we1 == we3));
 	}
 }
+TEST_CASE("unweighted edge") {
+	using unweighted_str = gdwg::unweighted_edge<std::string, std::string>;
+	using unweighted_int = gdwg::unweighted_edge<int, int>;
+	SECTION("Constructor") {
+		auto uwe1 = unweighted_str("A", "B");
+		auto nodes_1 = uwe1.get_nodes();
+		REQUIRE(nodes_1.first == "A");
+		REQUIRE(nodes_1.second == "B");
+		auto uwe2 = unweighted_int(1, 2);
+		auto nodes_2 = uwe2.get_nodes();
+		REQUIRE(nodes_2.first == 1);
+		REQUIRE(nodes_2.second == 2);
+	}
+	SECTION("get_nodes") {
+		auto uwe = unweighted_str("A", "B");
+		auto nodes = uwe.get_nodes();
+		REQUIRE(nodes.first == "A");
+		REQUIRE(nodes.second == "B");
+	}
+	SECTION("get_weight and is_weighted") {
+		auto uwe = unweighted_str("A", "B");
+		REQUIRE(uwe.get_weight() == std::nullopt);
+		REQUIRE(uwe.is_weighted() == false);
+	}
+	SECTION("print_edge") {
+		auto uwe = unweighted_str("A", "B");
+		REQUIRE(uwe.print_edge() == "A -> B | U");
+	}
+	SECTION("operator==") {
+		auto uwe1 = unweighted_str("A", "B");
+		auto uwe2 = unweighted_str("A", "B");
+		auto uwe3 = unweighted_str("Aa", "Ba");
+		REQUIRE(uwe1 == uwe2);
+		REQUIRE(!(uwe1 == uwe3));
+	}
+}
