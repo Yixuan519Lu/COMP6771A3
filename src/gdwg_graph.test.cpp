@@ -269,6 +269,16 @@ TEST_CASE("gdwg::graph") {
 				                  "Cannot call gdwg::graph<N, E>::erase_edge on src or dst if they don't exist in the "
 				                  "graph");
 			}
+			SECTION("erase all") {
+				CHECK(g.erase_edge(1, 2, 10));
+				CHECK(g.erase_edge(1, 3, 20));
+				CHECK(g.erase_edge(2, 3, 30));
+				CHECK(g.erase_edge(1, 2));
+				CHECK(g.edges(1, 2).empty());
+				CHECK(g.edges(1, 3).empty());
+				CHECK(g.edges(2, 3).empty());
+				CHECK(g.find(1, 2, 10) == g.end());
+			}
 		}
 		SECTION("Erase edge iterator i") {
 			SECTION("single edge") {
@@ -305,7 +315,7 @@ TEST_CASE("gdwg::graph") {
 				CHECK(edge.from == 2);
 				CHECK(edge.to == 3);
 				CHECK(edge.weight == 20);
-				CHECK(it == g.find(2, 3, 20));
+				CHECK(it != g.end());
 				CHECK(it == g.find(2, 3, 20));
 			}
 			SECTION("all edges") {
