@@ -795,3 +795,45 @@ TEST_CASE("unweighted edge") {
 		REQUIRE(!(uwe1 == uwe3));
 	}
 }
+TEST_CASE("edge inheritance") {
+	using string_unweighted_edge = gdwg::unweighted_edge<std::string, std::string>;
+	using string_weighted_edge = gdwg::weighted_edge<std::string, std::string>;
+	SECTION("weighted_edge") {
+		auto we = std::make_unique<string_weighted_edge>("A", "B", "10");
+		CHECK(we->get_nodes().first == "A");
+		CHECK(we->get_nodes().second == "B");
+		CHECK(we->get_weight() == "10");
+		CHECK(we->is_weighted() == true);
+		CHECK(we->print_edge() == "A -> B | W | 10");
+		auto we2 = std::make_unique<string_weighted_edge>("A", "B", "10");
+		auto we3 = std::make_unique<string_weighted_edge>("A", "B", "20");
+		CHECK(*we == *we2);
+		CHECK(!(*we == *we3));
+	}
+
+	SECTION("unweighted_edge") {
+		auto ue = std::make_unique<string_unweighted_edge>("A", "B");
+		CHECK(ue->get_nodes().first == "A");
+		CHECK(ue->get_nodes().second == "B");
+		CHECK(ue->get_weight() == std::nullopt);
+		CHECK(ue->is_weighted() == false);
+		CHECK(ue->print_edge() == "A -> B | U");
+		auto ue2 = std::make_unique<string_unweighted_edge>("A", "B");
+		auto ue3 = std::make_unique<string_unweighted_edge>("A", "C");
+		CHECK(*ue == *ue2);
+		CHECK(!(*ue == *ue3));
+	}
+	SECTION("test base") {
+		auto we = std::make_unique<gdwg::weighted_edge<std::string, std::string>>("A", "B", "10");
+		auto* edge_ptr = dynamic_cast<gdwg::edge<std::string, std::string>*>(we.get());
+		CHECK(edge_ptr->get_nodes().first == "A");
+		CHECK(edge_ptr->get_nodes().second == "B");
+		CHECK(edge_ptr->get_weight() == "10");
+		CHECK(edge_ptr->is_weighted() == true);
+		CHECK(edge_ptr->print_edge() == "A -> B | W | 10");
+		auto we2 = std::make_unique<gdwg::weighted_edge<std::string, std::string>>("A", "B", "10");
+		auto we3 = std::make_unique<gdwg::weighted_edge<std::string, std::string>>("A", "B", "20");
+		CHECK(*edge_ptr == *we2);
+		CHECK(!(*edge_ptr == *we3));
+	}
+}
