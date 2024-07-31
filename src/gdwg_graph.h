@@ -37,7 +37,6 @@ namespace gdwg {
 		virtual auto operator==(const edge<N, E>& rhs) const noexcept -> bool = 0;
 
 	 private:
-		friend class graph<N, E>;
 	};
 	template<typename N, typename E>
 	class weighted_edge : public edge<N, E> {
@@ -71,7 +70,6 @@ namespace gdwg {
 		N src_;
 		N dst_;
 		E weight_;
-		friend class graph<N, E>;
 	};
 	template<typename N, typename E>
 	class unweighted_edge : public edge<N, E> {
@@ -103,7 +101,6 @@ namespace gdwg {
 	 private:
 		N src_;
 		N dst_;
-		friend class graph<N, E>;
 	};
 	template<typename N, typename E>
 	class graph {
@@ -179,7 +176,7 @@ namespace gdwg {
 				--(*this);
 				return temp;
 			}
-			auto operator==(my_iterator const& other) const -> bool {
+			auto operator==(const my_iterator& other) const -> bool {
 				return outer_begin_ == other.outer_begin_ and inner_ == other.inner_;
 			}
 
@@ -260,7 +257,7 @@ namespace gdwg {
 			nodes_.clear();
 			edges_.clear();
 		}
-		auto insert_node(N const& value) noexcept -> bool {
+		auto insert_node(const N& value) noexcept -> bool {
 			for (const auto& node : nodes_) {
 				if (*node == value) {
 					return false;
@@ -336,7 +333,7 @@ namespace gdwg {
 			}
 			return res;
 		}
-		[[nodiscard]] auto find(N const& src, N const& dst, std::optional<E> weight = std::nullopt) const -> iterator {
+		[[nodiscard]] auto find(const N& src, const N& dst, std::optional<E> weight = std::nullopt) const -> iterator {
 			if (not is_node(src) or not is_node(dst)) {
 				return end();
 			}
@@ -353,7 +350,7 @@ namespace gdwg {
 			}
 			return end();
 		}
-		[[nodiscard]] auto connections(N const& src) const -> std::vector<N> {
+		[[nodiscard]] auto connections(const N& src) const -> std::vector<N> {
 			const auto src_sp = find_node(src);
 			if (not is_node(src)) {
 				throw std::runtime_error("Cannot call gdwg::graph<N, E>::connections if src doesn't exist in the "
@@ -518,7 +515,7 @@ namespace gdwg {
 			}
 			nodes_.erase(old_node_sp);
 		}
-		friend auto operator<<(std::ostream& os, graph const& g) -> std::ostream& {
+		friend auto operator<<(std::ostream& os, const graph& g) -> std::ostream& {
 			if (g.nodes_.empty()) {
 				return os;
 			}
