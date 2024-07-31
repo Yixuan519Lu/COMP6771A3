@@ -139,7 +139,7 @@ namespace gdwg {
 			using pointer = void;
 			using difference_type = std::ptrdiff_t;
 			using iterator_category = std::bidirectional_iterator_tag;
-			auto operator*() -> reference {
+			auto operator*() const -> reference {
 				return value_type{*outer_begin_->first, *inner_->first, inner_->second};
 			}
 			auto operator++() -> my_iterator& {
@@ -289,14 +289,14 @@ namespace gdwg {
 		[[nodiscard]] auto empty() const noexcept -> bool {
 			return nodes_.empty() and edges_.empty();
 		}
-		[[nodiscard]] auto nodes() -> std::vector<N> {
+		[[nodiscard]] auto nodes() const -> std::vector<N> {
 			auto res = std::vector<N>{};
 			for (const auto& node : nodes_) {
 				res.push_back(*node);
 			}
 			return res;
 		}
-		[[nodiscard]] auto is_connected(const N& src, const N& dst) -> bool {
+		[[nodiscard]] auto is_connected(const N& src, const N& dst) const -> bool {
 			const auto src_sp = find_node(src);
 			const auto dst_sp = find_node(dst);
 			if (not is_node(src) or not is_node(dst)) {
@@ -313,7 +313,7 @@ namespace gdwg {
 			}
 			return false;
 		}
-		[[nodiscard]] auto edges(const N& src, const N& dst) -> std::vector<std::unique_ptr<edge<N, E>>> {
+		[[nodiscard]] auto edges(const N& src, const N& dst) const -> std::vector<std::unique_ptr<edge<N, E>>> {
 			const auto src_sp = find_node(src);
 			const auto dst_sp = find_node(dst);
 			if (not is_node(src) or not is_node(dst)) {
@@ -336,7 +336,7 @@ namespace gdwg {
 			}
 			return res;
 		}
-		[[nodiscard]] auto find(N const& src, N const& dst, std::optional<E> weight = std::nullopt) -> iterator {
+		[[nodiscard]] auto find(N const& src, N const& dst, std::optional<E> weight = std::nullopt) const -> iterator {
 			if (not is_node(src) or not is_node(dst)) {
 				return end();
 			}
@@ -353,7 +353,7 @@ namespace gdwg {
 			}
 			return end();
 		}
-		[[nodiscard]] auto connections(N const& src) -> std::vector<N> {
+		[[nodiscard]] auto connections(N const& src) const -> std::vector<N> {
 			const auto src_sp = find_node(src);
 			if (not is_node(src)) {
 				throw std::runtime_error("Cannot call gdwg::graph<N, E>::connections if src doesn't exist in the "
