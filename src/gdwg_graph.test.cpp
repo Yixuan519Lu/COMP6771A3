@@ -307,7 +307,7 @@ TEST_CASE("gdwg::graph") {
 				auto it = g.find(1, 2, 10);
 				it = g.erase_edge(it);
 				it = g.erase_edge(it);
-				auto edges_1_2 = g.edges(1, 3);
+				auto edges_1_2 = g.edges(1, 2);
 				CHECK(edges_1_2.empty());
 				auto edges_1_3 = g.edges(1, 3);
 				CHECK(edges_1_3.empty());
@@ -654,8 +654,7 @@ TEST_CASE("gdwg::graph") {
 			g.insert_node(64);
 			auto out = std::ostringstream{};
 			out << g;
-			const auto expected_output = std::string_view(R"(
-1 (
+			const auto expected_output = std::string_view(R"(1 (
   1 -> 5 | W | -1
 )
 2 (

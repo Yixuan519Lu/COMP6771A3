@@ -108,10 +108,26 @@ namespace gdwg {
 	template<typename N, typename E>
 	class graph {
 	 private:
+		struct shared_ptr_less {
+			auto operator()(const std::shared_ptr<N>& lhs, const std::shared_ptr<N>& rhs) const -> bool {
+				return *lhs < *rhs;
+			}
+		};
+		struct pair_less {
+			auto operator()(const std::pair<std::shared_ptr<N>, std::optional<E>>& lhs,
+			                const std::pair<std::shared_ptr<N>, std::optional<E>>& rhs) const -> bool {
+				if (*lhs.first != *rhs.first) {
+					return *lhs.first < *rhs.first;
+				}
+				return lhs.second < rhs.second;
+			}
+		};
 		class my_iterator {
-			using inner_iterator = typename std::set<std::pair<std::shared_ptr<N>, std::optional<E>>>::const_iterator;
-			using outer_iterator =
-			    typename std::map<std::shared_ptr<N>, std::set<std::pair<std::shared_ptr<N>, std::optional<E>>>>::const_iterator;
+			using inner_iterator =
+			    typename std::set<std::pair<std::shared_ptr<N>, std::optional<E>>, pair_less>::const_iterator;
+			using outer_iterator = typename std::map<std::shared_ptr<N>,
+			                                         std::set<std::pair<std::shared_ptr<N>, std::optional<E>>, pair_less>,
+			                                         shared_ptr_less>::const_iterator;
 
 		 public:
 			struct value_type {
@@ -278,7 +294,6 @@ namespace gdwg {
 			for (const auto& node : nodes_) {
 				res.push_back(*node);
 			}
-			std::sort(res.begin(), res.end());
 			return res;
 		}
 		[[nodiscard]] auto is_connected(const N& src, const N& dst) -> bool {
@@ -355,7 +370,6 @@ namespace gdwg {
 					}
 				}
 			}
-			std::sort(res.begin(), res.end());
 			return res;
 		}
 		auto erase_node(const N& value) -> bool {
@@ -508,25 +522,15 @@ namespace gdwg {
 			if (g.nodes_.empty()) {
 				return os;
 			}
-			os << "\n";
-			auto nodes = std::vector<std::shared_ptr<N>>(g.nodes_.begin(), g.nodes_.end());
-			std::sort(nodes.begin(), nodes.end(), [](const std::shared_ptr<N>& a, const std::shared_ptr<N>& b) {
-				return *a < *b;
-			});
-			for (const auto& node : nodes) {
+			for (const auto& node : g.nodes_) {
 				os << *node << " (\n";
 				if (auto it = g.edges_.find(node); it != g.edges_.end()) {
-					auto edges = std::vector<std::pair<std::shared_ptr<N>, std::optional<E>>>(it->second.begin(),
-					                                                                          it->second.end());
-					std::sort(edges.begin(), edges.end(), [](const auto& a, const auto& b) {
-						return *a.first < *b.first;
-					});
-					for (const auto& edge_pair : edges) {
+					for (const auto& edge_pair : it->second) {
 						if (edge_pair.second == std::nullopt) {
 							os << "  " << *node << " -> " << *(edge_pair.first) << " | U\n";
 						}
 					}
-					for (const auto& edge_pair : edges) {
+					for (const auto& edge_pair : it->second) {
 						if (edge_pair.second != std::nullopt) {
 							os << "  " << *node << " -> " << *(edge_pair.first) << " | W | " << *edge_pair.second << "\n";
 						}
@@ -586,8 +590,8 @@ namespace gdwg {
 		}
 
 	 private:
-		std::set<std::shared_ptr<N>> nodes_;
-		std::map<std::shared_ptr<N>, std::set<std::pair<std::shared_ptr<N>, std::optional<E>>>> edges_;
+		std::set<std::shared_ptr<N>, shared_ptr_less> nodes_;
+		std::map<std::shared_ptr<N>, std::set<std::pair<std::shared_ptr<N>, std::optional<E>>, pair_less>, shared_ptr_less> edges_;
 		auto find_node(const N& value) const noexcept -> std::shared_ptr<N> {
 			for (const auto& node : nodes_) {
 				if (*node == value) {
