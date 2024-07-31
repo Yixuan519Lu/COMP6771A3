@@ -333,6 +333,16 @@ TEST_CASE("gdwg::graph") {
 					CHECK(g.connections(node).empty());
 				}
 			}
+			SECTION("erase and return s") {
+				auto g = graph{1, 2, 3};
+				g.insert_edge(1, 2, 10);
+				g.insert_edge(1, 3, 20);
+				g.insert_edge(2, 3, 30);
+				auto i = g.begin();
+				auto s = g.find(2, 3, 30);
+				auto it = g.erase_edge(i, s);
+				CHECK(it == s);
+			}
 		}
 		SECTION("Erase edge range") {
 			SECTION("erase all") {
